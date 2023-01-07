@@ -1,0 +1,224 @@
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+<button id="startButton" onClick="restartGame()">Restart Game</button>
+<script>
+    //Define canvas
+    var gameCanvas = document.getElementById("gameCanvas");
+    var ctx = gameCanvas.getContext("2d");
+    
+    //Load images
+    var imgAlien = new Image();
+    //imgAlien.src = "http://s3.amazonaws.com/gt7sp-prod/decal/76/67/97/4621335403474976776_1.png";
+    imgAlien.src = "Invader.png";
+
+    var imgDefender = new Image();
+    //imgDefender.src = "https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/e4af22756166f44.png";
+    imgDefender.src = "Defender.png";
+
+    var imgProjectile = new Image();
+    imgProjectile.src = "Bullet.png";
+
+    var imgEnemyProjectile = new Image();
+    imgEnemyProjectile.src = "EnemyProjectile.png";
+
+    var imgUFO = new Image();
+    imgUFO.src = "UFO.png";
+
+    var imgShield = new Image();
+    imgShield.src = "Shield.png";
+
+    //////////////////////////////////
+    //Game parameters
+
+    var defaultLives = 3;
+    var defaultHighscore = 1000;
+    var alienPoints = 10;
+    var UFOPoints = 50;
+    //TODO Adjust player speed
+    var playerSpeed = 1;
+    var playerProjectileSpeed = 1;
+
+    var playerHeight = 30;
+    var playerWidth = 60;
+    var playerProjectileHeight = 1;
+    var playerProjectileWidth = 1;
+    //END TODO
+    var maxPlayerProjectiles = 1;
+    var playerInitialPosX = 385;
+    var playerInitialPosY = 530;
+
+    //TODO Adjust alien speed depending on how they move
+    var alienRows = 5;
+    var alienColumns = 11;
+
+    var alienHeight = 30;
+    var alienWidth = 40;
+    var alienDefaultSpeed = 1;
+
+    var alienXLimitLeft = 50;
+    var alienXLimitRight = 750;
+    var alienXSeparation = 10;
+    var alienYSeparation = 10;
+    var alienYStart = 100;
+
+    var UFOSpeed = 1;
+
+    var enemyProjectileSpeed = 1;
+    var enemyProjectileChance = 1;
+    var enemyMaxProjectiles = 5;
+
+    var enemyProjectileHeight = 1;
+    var enemyProjectileWidth = 1;
+
+
+    var defaultShields = 4;
+    var defaultShieldHealth = 5;
+    var defaultShieldWidth = 90;
+    var defaultShieldHeight = 60;
+    var defaultShieldPosY = 400;
+    //End TODO
+
+    //Start loop
+    var fractions = 60;
+    var timeFraction = 1 / fractions;
+
+    var screenWidth = 800;
+    var screenHeight = 600;
+
+    var score = 0;
+    var highScore = defaultHighscore;
+    
+    var lives = defaultLives;
+    var playerPosX = playerInitialPosX;
+    var playerPosY = playerInitialPosY;
+
+    var alienList = [];
+    var alienX = 0;
+    var alienY = alienYStart;
+    var enemyProjectileList = [];
+    var UFO = null;
+
+    var shieldList = [];
+
+    var gameLoop = () => {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+        
+        //Draw score
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "#ffffff";
+        txtScore = "Score: " + score;
+        ctx.fillText(txtScore, 10, 30);
+
+        txtHighscore = "Hi-Score: " + highScore;
+        ctx.fillText(txtHighscore, 300, 30);
+
+        //Draw aliens
+        let alienLength = alienList.length;
+        for(let alienNo = 0; alienNo < alienLength; alienNo++){
+            //console.log("Gone through alien no: ", alienNo);
+            let currentAlien = alienList[alienNo];
+            //console.log(currentAlien);
+            ctx.drawImage(imgAlien, currentAlien.posX, currentAlien.posY, currentAlien.width, currentAlien.height);
+        }
+
+        //Draw UFO
+
+
+        //Draw shields
+        let shieldLength = shieldList.length;
+        for(let shieldNo = 0; shieldNo < shieldLength; shieldNo++){
+            let currentShield = shieldList[shieldNo];
+            ctx.drawImage(imgShield, currentShield.posX, currentShield.posY, currentShield.width, currentShield.height);
+        }
+
+        //Draw player
+        ctx.drawImage(imgDefender, playerPosX, playerPosY, playerWidth, playerHeight);
+
+        //Draw lives
+
+
+        //Check input and handle it
+
+        //Move aliens
+
+        //Check collision on player projectile
+            //Check if projectile hits shield
+
+
+            //Check if projectile hits alien
+
+
+        //Check collision of enemy projectile
+            //Check if projectile hits player
+
+            //Check if projectile hits shield
+    };
+
+    var restartGame = () => {
+        console.log("Restarted");
+        //Prepare score
+        score = 0;
+
+        //Prepare lives
+        lives = defaultLives;
+
+        //Add aliens to game
+        alienList = [];
+        let initialX = 400 - ((alienColumns * alienWidth + alienXSeparation * (alienColumns - 1)) / 2);        
+        let initialY = alienYStart;
+        let currentY = initialY;
+
+        //Create alien rows
+        for(let row = 0; row < alienRows; row++){
+
+            let currentX = initialX;
+
+            for(let column = 0; column < alienColumns; column++){
+
+                let alien = {
+                    row: row,
+                    column: column,
+                    posX: currentX,
+                    posY: currentY,
+                    width: alienWidth,
+                    height: alienHeight
+                };
+
+                alienList.push(alien);
+
+                currentX += alienXSeparation + alienWidth;
+            }
+
+            currentY += alienYSeparation + alienHeight;
+        }
+
+        //Add player
+        playerPosX = playerInitialPosX;
+        playerPosY = playerInitialPosY;
+
+        //Add shields
+        shieldList = [];
+        let currentX = 0;
+        //let halfShieldSeparation = defaultShieldWidth / 2;
+        let halfShieldSeparation = (800 - defaultShields * defaultShieldWidth) / (defaultShields + 1);
+        console.log(halfShieldSeparation);
+        for(let shieldNo = 0; shieldNo < defaultShields; shieldNo++){
+            currentX += halfShieldSeparation;
+
+            let shield = {
+                width: defaultShieldWidth,
+                height: defaultShieldHeight,
+                posX: currentX,
+                posY: defaultShieldPosY,
+                health: defaultShieldHealth
+            };
+
+            currentX += defaultShieldWidth;
+
+            shieldList.push(shield);
+        }
+
+        setInterval(gameLoop, timeFraction);
+    }
+
+</script>
