@@ -95,6 +95,7 @@
     var lives = defaultLives;
     var playerPosX = playerInitialPosX;
     var playerPosY = playerInitialPosY;
+    var playerProjectileList = [];
 
     var keyLeft = false;
     var keyRight = false;
@@ -165,7 +166,13 @@
             }
         }
         if(keyShoot == true){
-            //Shoot projectile
+            if(playerProjectileList.length < maxPlayerProjectiles && shotInputReleased == true){
+                //Shoot projectile
+            }
+            shotInputReleased = false;
+        }
+        else if(keyShoot == false){
+            shotInputReleased = true;
         }
 
         //Move aliens
