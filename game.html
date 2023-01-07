@@ -28,40 +28,45 @@
 
     //////////////////////////////////
     //Game parameters
+    //var gameStarted = 0;
 
     var defaultLives = 3;
     var defaultHighscore = 1000;
     var alienPoints = 10;
     var UFOPoints = 50;
-    //TODO Adjust player speed
+    
+    //Player settings
     var playerSpeed = 1;
     var playerProjectileSpeed = 1;
-
-    var playerHeight = 30;
-    var playerWidth = 60;
-    var playerProjectileHeight = 1;
-    var playerProjectileWidth = 1;
-    //END TODO
-    var maxPlayerProjectiles = 1;
     var playerInitialPosX = 385;
     var playerInitialPosY = 530;
+    var playerLimitXLeft = 50;
+    var playerLimitXRight = 750;
 
-    //TODO Adjust alien speed depending on how they move
+    var playerHeight = 20;
+    var playerWidth = 40;
+    var playerProjectileHeight = 1;
+    var playerProjectileWidth = 1;
+    var maxPlayerProjectiles = 1;
+
+    //Alien settings
     var alienRows = 5;
     var alienColumns = 11;
 
-    var alienHeight = 30;
+    var alienHeight = 20;
     var alienWidth = 40;
     var alienDefaultSpeed = 1;
 
     var alienXLimitLeft = 50;
     var alienXLimitRight = 750;
     var alienXSeparation = 10;
-    var alienYSeparation = 10;
+    var alienYSeparation = 15;
     var alienYStart = 100;
 
+    //UFO settings
     var UFOSpeed = 1;
 
+    //Enemy projectile settings
     var enemyProjectileSpeed = 1;
     var enemyProjectileChance = 1;
     var enemyMaxProjectiles = 5;
@@ -69,13 +74,13 @@
     var enemyProjectileHeight = 1;
     var enemyProjectileWidth = 1;
 
-
+    //Shield settings
     var defaultShields = 4;
     var defaultShieldHealth = 5;
     var defaultShieldWidth = 90;
-    var defaultShieldHeight = 60;
-    var defaultShieldPosY = 400;
-    //End TODO
+    var defaultShieldHeight = 40;
+    var defaultShieldPosY = 450;
+    //End of parameters
 
     //Start loop
     var fractions = 60;
@@ -90,6 +95,10 @@
     var lives = defaultLives;
     var playerPosX = playerInitialPosX;
     var playerPosY = playerInitialPosY;
+
+    var keyLeft = false;
+    var keyRight = false;
+    var keyShoot = false;
 
     var alienList = [];
     var alienX = 0;
@@ -135,11 +144,32 @@
         ctx.drawImage(imgDefender, playerPosX, playerPosY, playerWidth, playerHeight);
 
         //Draw lives
-
+        ctx.font = "20px Arial";
+        ctx.fillText(lives, 10, 590);
+        let initialXDrawingPos = 50;
+        for(let i = 1; i < lives; i++){
+            ctx.drawImage(imgDefender, (35*i), 575, 30, 15)
+        }
+        ctx.fillStyle = "#00FF00"
+        ctx.fillRect(0, 565, 800, 3);
 
         //Check input and handle it
+        if(keyLeft == true){
+            if((playerPosX - playerSpeed) >= playerLimitXLeft){
+                playerPosX -= playerSpeed;
+            }
+        }
+        if(keyRight == true){
+            if((playerPosX + playerWidth + playerSpeed) <= playerLimitXRight){
+                playerPosX += playerSpeed;
+            }
+        }
+        if(keyShoot == true){
+            //Shoot projectile
+        }
 
         //Move aliens
+        
 
         //Check collision on player projectile
             //Check if projectile hits shield
@@ -156,6 +186,8 @@
 
     var restartGame = () => {
         console.log("Restarted");
+        //gameStarted = 1;
+
         //Prepare score
         score = 0;
 
@@ -219,6 +251,31 @@
         }
 
         setInterval(gameLoop, timeFraction);
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+    }
+
+    var handleKeyDown = () =>{
+        if(event.keyCode == 37 && keyLeft == false) {
+            keyLeft = true;
+            console.log('Left was pressed');
+        }
+        else if(event.keyCode == 39 && keyRight == false) {
+            keyRight = true;
+            console.log('Right was pressed');
+        }
+    }
+
+    var handleKeyUp = () => {
+        if(event.keyCode == 37 && keyLeft == true) {
+            keyLeft = false;
+            console.log('Left was released');
+        }
+        else if(event.keyCode == 39 && keyRight == true) {
+            keyRight = false;
+            console.log('Right was released');
+        }
     }
 
 </script>
