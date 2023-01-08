@@ -37,7 +37,6 @@
     
     //Player settings
     var playerSpeed = 1;
-    var playerProjectileSpeed = 1;
     var playerInitialPosX = 385;
     var playerInitialPosY = 530;
     var playerLimitXLeft = 50;
@@ -45,9 +44,11 @@
 
     var playerHeight = 20;
     var playerWidth = 40;
-    var playerProjectileHeight = 1;
-    var playerProjectileWidth = 1;
+    var playerProjectileHeight = 20;
+    var playerProjectileWidth = 10;
     var maxPlayerProjectiles = 1;
+    var playerProjectileSpeed = 2;
+    var playerProjectileYLimit = 50;
 
     //Alien settings
     var alienRows = 5;
@@ -144,6 +145,15 @@
         //Draw player
         ctx.drawImage(imgDefender, playerPosX, playerPosY, playerWidth, playerHeight);
 
+        //Draw friendly projectiles
+        let listLength = playerProjectileList.length;
+        for(let i = 0; i < listLength; i++){
+            let current = playerProjectileList[i];
+            ctx.drawImage(imgProjectile, current.posX, current.posY, current.width, current.height);
+        }
+
+        //Draw enemy projectiles
+
         //Draw lives
         ctx.font = "20px Arial";
         ctx.fillText(lives, 10, 590);
@@ -168,6 +178,18 @@
         if(keyShoot == true){
             if(playerProjectileList.length < maxPlayerProjectiles && shotInputReleased == true){
                 //Shoot projectile
+                //Center projectile based on player
+                let centerPlayerX = playerPosX + (playerWidth / 2);
+                let projectileX = centerPlayerX - (playerProjectileWidth / 2);
+
+                let projectile = {
+                    posX: projectileX,
+                    posY: playerPosY,
+                    width: playerProjectileWidth,
+                    height: playerProjectileHeight 
+                };
+
+                playerProjectileList.push(projectile);
             }
             shotInputReleased = false;
         }
@@ -176,14 +198,113 @@
         }
 
         //Move aliens
+
         
+        //Move friendly projectile
+        let playerProjectileListLength = playerProjectileList.length;
+        for(let i = 0; i < playerProjectileListLength; i++){
+            let currentProjectile = playerProjectileList[i];
+            currentProjectile.posY -= playerProjectileSpeed;
+        }
+
+        //Move enemy projectile
+        let enemyProjectileLength = enemyProjectileList.length;
+        for(let i = 0; i < enemyProjectileLength; i++){
+            let currentProjectile = enemyProjectileList[i];
+            currentProjectile.posY += playerProjectileSpeed;
+        }
 
         //Check collision on player projectile
+        for(let projectileNo = 0; projectileNo < playerProjectileList.length; projectileNo++){
+            let removeProjectile = false;
+
+            let currentProjectile = playerProjectileList[projectileNo];
+
             //Check if projectile hits shield
 
+            for(let shieldNo = 0; shieldNo < shieldList.length; shieldNo++){
+                let currentShield = shieldList[shieldNo];
+
+                if(checkCollision(currentProjectile.posX, currentProjectile.width, 
+                currentProjectile.posY, currentProjectile.height, 
+                currentShield.posX, currentShield.width, 
+                currentShield.posY, currentShield.height)){
+                        currentShield.health--;
+
+                        if(currentShield.health <= 0){
+                            shieldList.splice(shieldNo, 1);
+                            //Creo que no se ocupa al ser destruido el proyectil
+                            //shieldNo--;
+                        }
+
+                        removeProjectile = true;
+                        break;
+                }
+
+            }
+
+            if(removeProjectile){
+                playerProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+                continue;
+            }
 
             //Check if projectile hits alien
+            for(let alienNo = 0; alienNo < alienList.length; alienNo++){
+                let currentAlien = alienList[alienNo];
 
+                if(checkCollision(currentProjectile.posX, currentProjectile.width, 
+                currentProjectile.posY, currentProjectile.height, 
+                currentAlien.posX, currentAlien.width, 
+                currentAlien.posY, currentAlien.height)){
+
+                        alienList.splice(alienNo, 1);
+                        removeProjectile = true;
+                        break;
+                }
+
+            }
+
+            if(removeProjectile){
+                playerProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+                continue;
+            }
+
+
+            //Check if projectile hits UFO
+            //TODO
+
+            if(removeProjectile){
+                playerProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+                continue;
+            }
+
+            //Check if projectile hits enemy projectile
+            //TODO
+            /*for(let enemyProjectileNo = 0; enemyProjectileNo < enemyProjectileList.length; enemyProjectileNo++){
+                let currentAlien = enemyProjectileList[enemyProjectileNo];
+
+                if(checkCollision(currentProjectile.posX, currentProjectile.width, 
+                currentProjectile.posY, currentProjectile.height, 
+                currentAlien.posX, currentAlien.width, 
+                currentAlien.posY, currentAlien.height)){
+
+                        alienList.pop(alienNo);
+                        removeProjectile = true;
+                        break;
+                }
+
+            }*/
+
+            //Projectile reaches end of screen
+            if(currentProjectile.posY <= playerProjectileYLimit){
+                playerProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+            }
+
+        }
 
         //Check collision of enemy projectile
             //Check if projectile hits player
@@ -272,6 +393,10 @@
             keyRight = true;
             console.log('Right was pressed');
         }
+        else if(event.keyCode == 65 && keyShoot == false) {
+            keyShoot = true;
+            console.log('A was pressed');
+        }
     }
 
     var handleKeyUp = () => {
@@ -283,6 +408,17 @@
             keyRight = false;
             console.log('Right was released');
         }
+        else if(event.keyCode == 65 && keyShoot == true) {
+            keyShoot = false;
+            console.log('A was pressed');
+        }
+    }
+
+    var checkCollision = (x1, width1, y1, height1, x2, width2, y2, height2) =>{
+        return x1 + width1 > x2 && 
+            x2 + width2 > x1 && 
+            y1 + height1 > y2 &&
+            y2 + height2 > y1;
     }
 
 </script>
