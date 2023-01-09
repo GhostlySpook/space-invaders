@@ -56,7 +56,11 @@
 
     var alienHeight = 20;
     var alienWidth = 40;
-    var alienDefaultFPSForAcceleration = 1;
+    var alienDirection = 1;
+    var alienXMoveDistance = 10;
+    var alienYMoveDistance = 10;
+    var alienDefaultFPSForMovement = 120;
+    var alienDefaultFPSForProjectile = 60;
 
     var alienXLimitLeft = 50;
     var alienXLimitRight = 750;
@@ -65,7 +69,7 @@
     var alienYStart = 100;
 
     //UFO settings
-    var UFOSpeed = 1;
+    var UFOSpeed = 10;
 
     //Enemy projectile settings
     var enemyProjectileSpeed = 1;
@@ -107,6 +111,9 @@
     var alienList = [];
     var alienX = 0;
     var alienY = alienYStart;
+    var alienMovementFPS = 0;
+    let alienChangeDirection = false;
+
     var enemyProjectileList = [];
     var UFO = null;
 
@@ -155,7 +162,11 @@
         }
 
         //Draw enemy projectiles
-        //TODO
+        listLength = enemyProjectileList.length;
+        for(let i = 0; i < listLength; i++){
+            let current = enemyProjectileList[i];
+            ctx.drawImage(imgEnemyProjectile, current.posX, current.posY, current.width, current.height);
+        }
 
         //Draw lives
         ctx.font = "20px Arial";
@@ -200,8 +211,35 @@
             shotInputReleased = true;
         }
 
+
+
         //Move aliens
-        //TODO
+        if(alienDefaultFPSForMovement <= alienMovementFPS){
+            listLength = alienList.length;
+
+            if(alienChangeDirection){
+                alienDirection *= -1;
+
+                for(let alienNo = 0; alienNo < listLength; alienNo++){
+                    alienList[alienNo].posY += alienYMoveDistance;
+                }
+
+                alienChangeDirection = false;
+            }
+            
+            for(let alienNo = 0; alienNo < listLength; alienNo++){
+                alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+
+                if(alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft){
+                    alienChangeDirection = true;
+                }
+            }
+
+            alienMovementFPS = 0;
+        }
+        else{
+            alienMovementFPS++;
+        }
 
         //Create enemy projectiles
         //TODO
