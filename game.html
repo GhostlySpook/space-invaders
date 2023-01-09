@@ -32,11 +32,9 @@
 
     var defaultLives = 3;
     var defaultHighscore = 1000;
-    var alienPoints = 10;
-    var UFOPoints = 50;
     
     //Player settings
-    var playerSpeed = 1;
+    var playerSpeed = 4;
     var playerInitialPosX = 385;
     var playerInitialPosY = 530;
     var playerLimitXLeft = 50;
@@ -44,10 +42,11 @@
 
     var playerHeight = 20;
     var playerWidth = 40;
+
     var playerProjectileHeight = 20;
     var playerProjectileWidth = 2;
     var maxPlayerProjectiles = 1;
-    var playerProjectileSpeed = 2.2;
+    var playerProjectileSpeed = 10;
     var playerProjectileYLimit = 50;
 
     //Alien settings
@@ -59,7 +58,7 @@
     var alienDirection = 1;
     var alienXMoveDistance = 10;
     var alienYMoveDistance = 10;
-    var alienDefaultFPSForMovement = 120;
+    var alienDefaultFPSForMovement = 60;
     var alienDefaultFPSForProjectile = 60;
 
     var alienXLimitLeft = 50;
@@ -68,8 +67,12 @@
     var alienYSeparation = 15;
     var alienYStart = 100;
 
+    var alienPoints = 10;
+
     //UFO settings
     var UFOSpeed = 10;
+
+    var UFOPoints = 50;
 
     //Enemy projectile settings
     var enemyProjectileSpeed = 1;
@@ -91,7 +94,7 @@
     var gameInterval;
 
     var fractions = 60;
-    var timeFraction = 1 / fractions;
+    var timeFraction = 1000 / fractions;
 
     var screenWidth = 800;
     var screenHeight = 600;
