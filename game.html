@@ -350,9 +350,18 @@
                         }
 
                         if(lowestAlien != null){
+                            bottomAliens.push(lowestAlien);
+                        }
+                        
+                        bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
+
+                        /*if(lowestAlien != null){
                             bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
                             bottomAliens.push(lowestAlien);
                         }
+                        else{
+
+                        }*/
 
                         break;
                 }
@@ -450,7 +459,7 @@
             }
 
             //Projectile reaches end of screen
-            if(currentProjectile.posY >= 600){
+            if(currentProjectile.posY >= 550){
                 enemyProjectileList.splice(projectileNo, 1);
                 projectileNo--;
             }
