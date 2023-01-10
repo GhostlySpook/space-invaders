@@ -59,7 +59,7 @@
     var alienXMoveDistance = 10;
     var alienYMoveDistance = 10;
     var alienDefaultFPSForMovement = 60;
-    var alienDefaultFPSForProjectile = 60;
+    var alienDefaultFPSForProjectile = 120;
 
     var alienXLimitLeft = 50;
     var alienXLimitRight = 750;
@@ -75,12 +75,12 @@
     var UFOPoints = 50;
 
     //Enemy projectile settings
-    var enemyProjectileSpeed = 1;
+    var enemyProjectileSpeed = 5;
     var enemyProjectileChance = 1;
     var enemyMaxProjectiles = 5;
 
-    var enemyProjectileHeight = 1;
-    var enemyProjectileWidth = 1;
+    var enemyProjectileHeight = 20;
+    var enemyProjectileWidth = 8;
 
     //Shield settings
     var defaultShields = 4;
@@ -116,8 +116,11 @@
     var alienY = alienYStart;
     var alienMovementFPS = 0;
     let alienChangeDirection = false;
+    var bottomAliens = [];
 
     var enemyProjectileList = [];
+    var alienProjectileFPS = 0;
+
     var UFO = null;
 
     var shieldList = [];
@@ -246,6 +249,29 @@
 
         //Create enemy projectiles
         //TODO
+        if(alienDefaultFPSForProjectile <= alienProjectileFPS){
+            listLength = alienList.length;
+
+            //Select a random alien from the bottom and shoot
+            //TODO
+            let randomAlien = bottomAliens[Math.floor(Math.random() * bottomAliens.length)];
+
+            let projectileX = randomAlien.posX + (randomAlien.width / 2);
+
+            let enemyProjectile = {
+                posX: projectileX,
+                posY: (randomAlien.posY + randomAlien.height),
+                width: enemyProjectileWidth,
+                height: enemyProjectileHeight
+            };
+            enemyProjectileList.push(enemyProjectile);
+
+            alienProjectileFPS = 0;
+            console.log("Created enemy projectile");
+        }
+        else{
+            alienProjectileFPS++;
+        }
         
         //Move friendly projectile
         let playerProjectileListLength = playerProjectileList.length;
@@ -258,7 +284,7 @@
         let enemyProjectileLength = enemyProjectileList.length;
         for(let i = 0; i < enemyProjectileLength; i++){
             let currentProjectile = enemyProjectileList[i];
-            currentProjectile.posY += playerProjectileSpeed;
+            currentProjectile.posY += enemyProjectileSpeed;
         }
 
         //Check collision on player projectile
@@ -305,8 +331,29 @@
                 currentAlien.posX, currentAlien.width, 
                 currentAlien.posY, currentAlien.height)){
 
+                        let currentColumn = currentAlien.column;
+                        let currentRow = currentAlien.row;
                         alienList.splice(alienNo, 1);
                         removeProjectile = true;
+
+                        //Update aliens in bottom
+                        let lowestAlien = null;
+                        for(let i = 0; i < alienList.length; i++){
+                            if(currentColumn == alienList[i].column){
+                                if(lowestAlien == null){
+                                    lowestAlien = alienList[i];
+                                }
+                                else if(lowestAlien.row < alienList[i].row){
+                                    lowestAlien = alienList[i];
+                                }
+                            }
+                        }
+
+                        if(lowestAlien != null){
+                            bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
+                            bottomAliens.push(lowestAlien);
+                        }
+
                         break;
                 }
             }
@@ -353,13 +400,69 @@
         }
 
         //Check collision of enemy projectile
+        for(let projectileNo = 0; projectileNo < enemyProjectileList.length; projectileNo++){
+            let removeProjectile = false;
+
+            let currentProjectile = enemyProjectileList[projectileNo];
+
+            //Check if projectile hits shield
+
+            for(let shieldNo = 0; shieldNo < shieldList.length; shieldNo++){
+                let currentShield = shieldList[shieldNo];
+
+                if(checkCollision(currentProjectile.posX, currentProjectile.width, 
+                currentProjectile.posY, currentProjectile.height, 
+                currentShield.posX, currentShield.width, 
+                currentShield.posY, currentShield.height)){
+                        currentShield.health--;
+
+                        if(currentShield.health <= 0){
+                            shieldList.splice(shieldNo, 1);
+                            //Creo que no se ocupa al ser destruido el proyectil
+                            //shieldNo--;
+                        }
+
+                        removeProjectile = true;
+                        break;
+                }
+
+            }
+
+            if(removeProjectile){
+                enemyProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+                continue;
+            }
+
+            //Check if projectile hits player
+            if(checkCollision(currentProjectile.posX, currentProjectile.width,
+            currentProjectile.posY, currentProjectile.height,
+            playerPosX, playerWidth, playerPosY, playerHeight)){
+                //TODO Activate game over check and all that
+                lives--;
+                removeProjectile = true;
+            }
+
+            if(removeProjectile){
+                enemyProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+                continue;
+            }
+
+            //Projectile reaches end of screen
+            if(currentProjectile.posY >= 600){
+                enemyProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+            }
+        }
+
             //Check if projectile hits player
 
             //Check if projectile hits shield
     };
 
     var restartGame = () => {
-        console.log("Restarted");
+        //console.log("Restarted");
         
         if(gameInterval != null){
             clearInterval(gameInterval);
@@ -400,6 +503,11 @@
                 alienList.push(alien);
 
                 currentX += alienXSeparation + alienWidth;
+
+                if(row == alienRows - 1){
+                    bottomAliens.push(alien);
+                    console.log(bottomAliens);
+                }
             }
 
             currentY += alienYSeparation + alienHeight;
@@ -414,7 +522,7 @@
         let currentX = 0;
         //let halfShieldSeparation = defaultShieldWidth / 2;
         let halfShieldSeparation = (800 - defaultShields * defaultShieldWidth) / (defaultShields + 1);
-        console.log(halfShieldSeparation);
+        //console.log(halfShieldSeparation);
         for(let shieldNo = 0; shieldNo < defaultShields; shieldNo++){
             currentX += halfShieldSeparation;
 
@@ -440,15 +548,15 @@
     var handleKeyDown = () =>{
         if(event.keyCode == 37 && keyLeft == false) {
             keyLeft = true;
-            console.log('Left was pressed');
+            //console.log('Left was pressed');
         }
         else if(event.keyCode == 39 && keyRight == false) {
             keyRight = true;
-            console.log('Right was pressed');
+            //console.log('Right was pressed');
         }
         else if(event.keyCode == 65 && keyShoot == false) {
             keyShoot = true;
-            console.log('A was pressed');
+            //console.log('A was pressed');
         }
     }
 
