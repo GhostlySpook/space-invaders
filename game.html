@@ -352,7 +352,7 @@
                         if(lowestAlien != null){
                             bottomAliens.push(lowestAlien);
                         }
-                        
+
                         bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
 
                         /*if(lowestAlien != null){
@@ -384,21 +384,26 @@
             }
 
             //Check if projectile hits enemy projectile
-            //TODO
-            /*for(let enemyProjectileNo = 0; enemyProjectileNo < enemyProjectileList.length; enemyProjectileNo++){
-                let currentAlien = enemyProjectileList[enemyProjectileNo];
+            for(let enemyProjectileNo = 0; enemyProjectileNo < enemyProjectileList.length; enemyProjectileNo++){
+                let current = enemyProjectileList[enemyProjectileNo];
 
                 if(checkCollision(currentProjectile.posX, currentProjectile.width, 
                 currentProjectile.posY, currentProjectile.height, 
-                currentAlien.posX, currentAlien.width, 
-                currentAlien.posY, currentAlien.height)){
+                current.posX, current.width, 
+                current.posY, current.height)){
 
-                        alienList.pop(alienNo);
+                        enemyProjectileList.splice(enemyProjectileNo, 1);
                         removeProjectile = true;
                         break;
                 }
 
-            }*/
+            }
+
+            if(removeProjectile){
+                playerProjectileList.splice(projectileNo, 1);
+                projectileNo--;
+                continue;
+            }
 
             //Projectile reaches end of screen
             if(currentProjectile.posY <= playerProjectileYLimit){
