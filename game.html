@@ -220,7 +220,7 @@
 
 
         //Move aliens
-        if(alienDefaultFPSForMovement <= alienMovementFPS){
+        if(alienDefaultFPSForMovement <= alienMovementFPS && alienList.length > 0){
             listLength = alienList.length;
 
             if(alienChangeDirection){
@@ -249,11 +249,10 @@
 
         //Create enemy projectiles
         //TODO
-        if(alienDefaultFPSForProjectile <= alienProjectileFPS){
+        if(alienDefaultFPSForProjectile <= alienProjectileFPS && alienList.length > 0){
             listLength = alienList.length;
 
             //Select a random alien from the bottom and shoot
-            //TODO
             let randomAlien = bottomAliens[Math.floor(Math.random() * bottomAliens.length)];
 
             let projectileX = randomAlien.posX + (randomAlien.width / 2);
@@ -267,7 +266,7 @@
             enemyProjectileList.push(enemyProjectile);
 
             alienProjectileFPS = 0;
-            console.log("Created enemy projectile");
+            //console.log("Created enemy projectile");
         }
         else{
             alienProjectileFPS++;
@@ -331,6 +330,8 @@
                 currentAlien.posX, currentAlien.width, 
                 currentAlien.posY, currentAlien.height)){
 
+                        score += alienPoints;
+
                         let currentColumn = currentAlien.column;
                         let currentRow = currentAlien.row;
                         alienList.splice(alienNo, 1);
@@ -354,15 +355,6 @@
                         }
 
                         bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
-
-                        /*if(lowestAlien != null){
-                            bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
-                            bottomAliens.push(lowestAlien);
-                        }
-                        else{
-
-                        }*/
-
                         break;
                 }
             }
