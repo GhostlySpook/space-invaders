@@ -58,7 +58,7 @@
     var alienDirection = 1;
     var alienXMoveDistance = 10;
     var alienYMoveDistance = 10;
-    var alienDefaultFPSForMovement = 60;
+    var alienDefaultFPSForMovement = 10;
     var alienDefaultFPSForProjectile = 120;
 
     var alienXLimitLeft = 50;
@@ -115,7 +115,10 @@
     var alienX = 0;
     var alienY = alienYStart;
     var alienMovementFPS = 0;
-    let alienChangeDirection = false;
+    var alienFlagDirection = false;
+    var alienReadyChangeDirection = false;
+    var alienMovementRows = [];
+    var alienCurrentMovementIndex = 0;
     var bottomAliens = [];
 
     var enemyProjectileList = [];
@@ -218,30 +221,100 @@
         }
 
 
-
-        //Move aliens
+        //Make aliens move down in their turn too
+        //TODO
+        
+        //Move aliens when the time arrives and there ARE aliens
         if(alienDefaultFPSForMovement <= alienMovementFPS && alienList.length > 0){
+            //console.log("Current alien direction: ", alienDirection)
+            //console.log("Alien moving row: ", alienCurrentMovementIndex);
             listLength = alienList.length;
+            let lastRow = alienMovementRows[(alienMovementRows.length - 1)]
 
-            if(alienChangeDirection){
-                alienDirection *= -1;
-
-                for(let alienNo = 0; alienNo < listLength; alienNo++){
-                    alienList[alienNo].posY += alienYMoveDistance;
+            if(alienReadyChangeDirection){
+                if((alienMovementRows.length - 1) == alienCurrentMovementIndex){
+                    alienDirection *= -1;
                 }
 
-                alienChangeDirection = false;
+                for(let alienNo = 0; alienNo < listLength; alienNo++){
+                    if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
+                        alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                        alienList[alienNo].posY += alienYMoveDistance;
+                    }
+
+                    if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
+                        alienFlagDirection = true;
+                    }
+
+                    if(alienCurrentMovementIndex == 0){
+                        alienFlagDirection = false;
+                        alienReadyChangeDirection = false;
+                    }
+                }
+            }
+            else{
+                
+                for(let alienNo = 0; alienNo < listLength; alienNo++){
+                    if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
+                        alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                    }
+
+                    if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
+                        alienFlagDirection = true;
+                    }
+                }
+            }
+
+            if(alienCurrentMovementIndex == 0 && alienFlagDirection == true){
+                alienReadyChangeDirection = true;
+            }
+
+            alienMovementFPS = 0;
+
+            alienCurrentMovementIndex--;
+            if(alienCurrentMovementIndex < 0){
+                alienCurrentMovementIndex = alienMovementRows.length - 1;
+            }
+
+            //Change the direction of the movement if it should
+            /*if(alienChangeDirection){
+
+                //Make aliens move down
+                for(let alienNo = 0; alienNo < listLength; alienNo++){
+                    if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
+                        alienList[alienNo].posY += alienYMoveDistance;
+                    }
+                }
+
+                if(alienCurrentMovementIndex == 0){
+                    alienDirection *= -1;
+                    alienChangeDirection = false;
+                }
             }
             
             for(let alienNo = 0; alienNo < listLength; alienNo++){
-                alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
+                    alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                }
 
-                if(alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft){
+                //Mark change of direction if it is the bottom row
+                //Get biggest number of row
+
+
+                let lastRow = alienMovementRows[(alienMovementRows.length - 1)]
+                console.log("Last Row: ", lastRow);
+                if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft) && alienList[alienNo].row == lastRow){
                     alienChangeDirection = true;
                 }
             }
 
+
             alienMovementFPS = 0;
+
+            alienCurrentMovementIndex--;
+            if(alienCurrentMovementIndex < 0){
+                alienCurrentMovementIndex = alienMovementRows.length - 1;
+            }*/
         }
         else{
             alienMovementFPS++;
@@ -323,18 +396,24 @@
 
             //Check if projectile hits alien
             for(let alienNo = 0; alienNo < alienList.length; alienNo++){
+                //console.log(alienNo);
                 let currentAlien = alienList[alienNo];
 
                 if(checkCollision(currentProjectile.posX, currentProjectile.width, 
                 currentProjectile.posY, currentProjectile.height, 
                 currentAlien.posX, currentAlien.width, 
                 currentAlien.posY, currentAlien.height)){
+                    //console.log("Current alien: ", alienNo);
+                    console.log("Pre-shot:");
+                    console.log("Alien list: ", alienList);
+                    console.log("Moving rows: ", alienMovementRows);
 
                         score += alienPoints;
 
                         let currentColumn = currentAlien.column;
                         let currentRow = currentAlien.row;
                         alienList.splice(alienNo, 1);
+                        //console.log("Removing alien no: ", alienNo);
                         removeProjectile = true;
 
                         //Update aliens in bottom
@@ -355,6 +434,26 @@
                         }
 
                         bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
+
+                        //Update living rows for aliens
+                        //If there aren't any aliens in the row, then remove the row from the movement queue and make index go down to one
+                        let tempList = alienList.filter(alien => alien.row == currentRow);
+                        console.log("Living alien in row:", tempList);
+                        if(tempList.length <= 0){
+                            let indexToDelete = alienMovementRows.findIndex(row => currentRow == row);
+                            alienMovementRows.splice(indexToDelete, 1);
+                            if(indexToDelete <= alienCurrentMovementIndex){
+                                alienCurrentMovementIndex--;
+                                if(alienCurrentMovementIndex < 0){
+                                    alienCurrentMovementIndex = alienMovementRows.length - 1;
+                                }
+                            }
+                        }
+
+                        console.log("Post-shot:");
+                        console.log("Alien list: ", alienList);
+                        console.log("Moving rows: ", alienMovementRows);
+
                         break;
                 }
             }
@@ -486,12 +585,15 @@
 
         //Add aliens to game
         alienList = [];
+        alienMovementRows = [];
+        alienCurrentMovementIndex = alienRows - 1;
         let initialX = 400 - ((alienColumns * alienWidth + alienXSeparation * (alienColumns - 1)) / 2);        
         let initialY = alienYStart;
         let currentY = initialY;
 
         //Create alien rows
         for(let row = 0; row < alienRows; row++){
+            alienMovementRows.push(row);
 
             let currentX = initialX;
 
@@ -512,7 +614,7 @@
 
                 if(row == alienRows - 1){
                     bottomAliens.push(alien);
-                    console.log(bottomAliens);
+                    //console.log("Bottom Aliens:", bottomAliens);
                 }
             }
 
@@ -569,15 +671,15 @@
     var handleKeyUp = () => {
         if(event.keyCode == 37 && keyLeft == true) {
             keyLeft = false;
-            console.log('Left was released');
+            //console.log('Left was released');
         }
         else if(event.keyCode == 39 && keyRight == true) {
             keyRight = false;
-            console.log('Right was released');
+            //console.log('Right was released');
         }
         else if(event.keyCode == 65 && keyShoot == true) {
             keyShoot = false;
-            console.log('A was pressed');
+            //console.log('A was pressed');
         }
     }
 
