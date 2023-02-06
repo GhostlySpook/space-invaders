@@ -29,6 +29,10 @@
     //////////////////////////////////
     //Game parameters
     //var gameStarted = 0;
+    var fractions = 60;
+    var timeFraction = 1000 / fractions;
+    var screenWidth = 800;
+    var screenHeight = 600;
 
     var defaultLives = 3;
     var defaultHighscore = 1000;
@@ -70,9 +74,18 @@
     var alienPoints = 10;
 
     //UFO settings
-    var UFOSpeed = 10;
-
+    var UFOSpeed = 3;
     var UFOPoints = 50;
+    var UFOFramesForSpawn = fractions * 30;//FPS of game times the seconds each UFO takes to spawn
+    var UFOWidth = 50;
+    var UFOHeight = 20;
+    var UFOXLeftLimit = 0; //Disappear once the left part touches the edge
+    var UFOXRightLimit = screenWidth; //UFO should disappear once the right part touches the limit
+    var UFOYSpawn = 60;
+    const UFODirections = {
+        RIGHT: 0,
+        LEFT: 1
+    }
 
     //Enemy projectile settings
     var enemyProjectileSpeed = 5;
@@ -92,12 +105,6 @@
 
     //Start loop
     var gameInterval;
-
-    var fractions = 60;
-    var timeFraction = 1000 / fractions;
-
-    var screenWidth = 800;
-    var screenHeight = 600;
 
     var score = 0;
     var highScore = defaultHighscore;
@@ -124,7 +131,9 @@
     var enemyProjectileList = [];
     var alienProjectileFPS = 0;
 
-    var UFO = null;
+    //var UFO = null;
+    var UFOCountSpawnFPS = 0;
+    var UFOList = [];
 
     var shieldList = [];
 
@@ -151,7 +160,12 @@
         }
 
         //Draw UFO
-        //TODO
+        let UFOLength = UFOList.length;
+        for(let UFONo = 0; UFONo < UFOLength; UFONo++){
+            let currentUFO = UFOList[UFONo];
+            console.log("Drawing UFO");
+            ctx.drawImage(imgUFO, currentUFO.posX, currentUFO.posY, currentUFO.width, currentUFO.height);
+        }
 
         //Draw shields
         let shieldLength = shieldList.length;
@@ -219,10 +233,6 @@
         else if(keyShoot == false){
             shotInputReleased = true;
         }
-
-
-        //Make aliens move down in their turn too
-        //TODO
         
         //Move aliens when the time arrives and there ARE aliens
         if(alienDefaultFPSForMovement <= alienMovementFPS && alienList.length > 0){
@@ -275,53 +285,83 @@
             if(alienCurrentMovementIndex < 0){
                 alienCurrentMovementIndex = alienMovementRows.length - 1;
             }
-
-            //Change the direction of the movement if it should
-            /*if(alienChangeDirection){
-
-                //Make aliens move down
-                for(let alienNo = 0; alienNo < listLength; alienNo++){
-                    if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
-                        alienList[alienNo].posY += alienYMoveDistance;
-                    }
-                }
-
-                if(alienCurrentMovementIndex == 0){
-                    alienDirection *= -1;
-                    alienChangeDirection = false;
-                }
-            }
-            
-            for(let alienNo = 0; alienNo < listLength; alienNo++){
-                if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
-                    alienList[alienNo].posX += alienDirection * alienXMoveDistance;
-                }
-
-                //Mark change of direction if it is the bottom row
-                //Get biggest number of row
-
-
-                let lastRow = alienMovementRows[(alienMovementRows.length - 1)]
-                console.log("Last Row: ", lastRow);
-                if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft) && alienList[alienNo].row == lastRow){
-                    alienChangeDirection = true;
-                }
-            }
-
-
-            alienMovementFPS = 0;
-
-            alienCurrentMovementIndex--;
-            if(alienCurrentMovementIndex < 0){
-                alienCurrentMovementIndex = alienMovementRows.length - 1;
-            }*/
         }
         else{
             alienMovementFPS++;
         }
 
-        //Create enemy projectiles
+        //Check alien collision
         //TODO
+            //Check collision with shield
+            //TODO
+            //Check collision with player
+            //TODO
+
+        //Create UFOs
+        //TODO
+        if(UFOCountSpawnFPS >= UFOFramesForSpawn){
+            console.log("Created UFO!");
+            //Choose whether the UFO moves to the left or to the right
+            let direction = Math.floor(Math.random() * 2);
+
+            //If the direction is to go right
+            if(direction == UFODirections.RIGHT){
+                //Spawn on the left side
+                posX = UFOXLeftLimit;
+            }
+            else{
+                posX = UFOXRightLimit;
+            }
+
+            let newUFO = {
+                direction: direction,
+                width: UFOWidth,
+                height: UFOHeight,
+                posX: posX,
+                posY: UFOYSpawn
+            }
+
+            UFOList.push(newUFO);
+
+            UFOCountSpawnFPS = 0;
+        }
+        else{
+            UFOCountSpawnFPS++;
+        }
+        
+        //Move UFOS
+        for(let i = 0; i < UFOList.length; i++){
+            let currentUFO = UFOList[i];
+
+            //When the UFO is going right
+            if(currentUFO.direction == UFODirections.RIGHT){
+                //Do the movement
+                currentUFO.posX += UFOSpeed;
+            
+                //Check if the UFO has reached the limit (Check the direction it is going). This case, if it reached the right side
+                if(currentUFO.posX + currentUFO.width >= UFOXRightLimit){
+                    //Delete the UFO! in the current position
+                    console.log("Destroyed UFO");
+                    UFOList.splice(i, 1);
+                    i--;
+                    continue
+                }
+            }
+            else{
+                //Same to case above
+                currentUFO.posX -= UFOSpeed;
+
+                if(currentUFO.posX <= UFOXLeftLimit){
+                    //Delete the UFO! in the current position
+                    console.log("Destroyed UFO");
+                    UFOList.splice(i, 1);
+                    i--;
+                    continue
+                }
+            }
+        }
+
+        //Create enemy projectiles
         if(alienDefaultFPSForProjectile <= alienProjectileFPS && alienList.length > 0){
             listLength = alienList.length;
 
@@ -339,7 +379,6 @@
             enemyProjectileList.push(enemyProjectile);
 
             alienProjectileFPS = 0;
-            //console.log("Created enemy projectile");
         }
         else{
             alienProjectileFPS++;
@@ -403,7 +442,6 @@
                 currentProjectile.posY, currentProjectile.height, 
                 currentAlien.posX, currentAlien.width, 
                 currentAlien.posY, currentAlien.height)){
-                    //console.log("Current alien: ", alienNo);
                     console.log("Pre-shot:");
                     console.log("Alien list: ", alienList);
                     console.log("Moving rows: ", alienMovementRows);
@@ -450,9 +488,9 @@
                             }
                         }
 
-                        console.log("Post-shot:");
+                        /*console.log("Post-shot:");
                         console.log("Alien list: ", alienList);
-                        console.log("Moving rows: ", alienMovementRows);
+                        console.log("Moving rows: ", alienMovementRows);*/
 
                         break;
                 }
@@ -466,7 +504,26 @@
 
 
             //Check if projectile hits UFO
-            //TODO
+            for(let UFONo = 0; UFONo < UFOList.length; UFONo++){
+                let currentUFO = UFOList[UFONo];
+
+                if(checkCollision(currentProjectile.posX, currentProjectile.width, 
+                currentProjectile.posY, currentProjectile.height, 
+                currentUFO.posX, currentUFO.width, 
+                currentUFO.posY, currentUFO.height)){
+
+                        //Give random points after hitting!
+                        score += Math.floor(Math.random() * 6) * 50 + 50; //Score generated should be from 50 to 300
+                        
+                        //Remove UFO
+                        UFOList.splice(UFONo, 1);
+
+                        removeProjectile = true;
+
+                        //Because the projectile is destroyed, stop iterating what it could hit
+                        break;
+                }
+            }
 
             if(removeProjectile){
                 playerProjectileList.splice(projectileNo, 1);
@@ -487,7 +544,6 @@
                         removeProjectile = true;
                         break;
                 }
-
             }
 
             if(removeProjectile){
@@ -560,10 +616,6 @@
                 projectileNo--;
             }
         }
-
-            //Check if projectile hits player
-
-            //Check if projectile hits shield
     };
 
     var restartGame = () => {
@@ -628,9 +680,7 @@
         //Add shields
         shieldList = [];
         let currentX = 0;
-        //let halfShieldSeparation = defaultShieldWidth / 2;
         let halfShieldSeparation = (800 - defaultShields * defaultShieldWidth) / (defaultShields + 1);
-        //console.log(halfShieldSeparation);
         for(let shieldNo = 0; shieldNo < defaultShields; shieldNo++){
             currentX += halfShieldSeparation;
 
