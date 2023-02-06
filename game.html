@@ -163,7 +163,6 @@
         let UFOLength = UFOList.length;
         for(let UFONo = 0; UFONo < UFOLength; UFONo++){
             let currentUFO = UFOList[UFONo];
-            console.log("Drawing UFO");
             ctx.drawImage(imgUFO, currentUFO.posX, currentUFO.posY, currentUFO.width, currentUFO.height);
         }
 
@@ -298,9 +297,8 @@
             //TODO
 
         //Create UFOs
-        //TODO
         if(UFOCountSpawnFPS >= UFOFramesForSpawn){
-            console.log("Created UFO!");
+            //console.log("Created UFO!");
             //Choose whether the UFO moves to the left or to the right
             let direction = Math.floor(Math.random() * 2);
 
@@ -341,7 +339,6 @@
                 //Check if the UFO has reached the limit (Check the direction it is going). This case, if it reached the right side
                 if(currentUFO.posX + currentUFO.width >= UFOXRightLimit){
                     //Delete the UFO! in the current position
-                    console.log("Destroyed UFO");
                     UFOList.splice(i, 1);
                     i--;
                     continue
@@ -353,7 +350,6 @@
 
                 if(currentUFO.posX <= UFOXLeftLimit){
                     //Delete the UFO! in the current position
-                    console.log("Destroyed UFO");
                     UFOList.splice(i, 1);
                     i--;
                     continue
@@ -442,9 +438,9 @@
                 currentProjectile.posY, currentProjectile.height, 
                 currentAlien.posX, currentAlien.width, 
                 currentAlien.posY, currentAlien.height)){
-                    console.log("Pre-shot:");
+                    /*console.log("Pre-shot:");
                     console.log("Alien list: ", alienList);
-                    console.log("Moving rows: ", alienMovementRows);
+                    console.log("Moving rows: ", alienMovementRows);*/
 
                         score += alienPoints;
 
@@ -476,7 +472,7 @@
                         //Update living rows for aliens
                         //If there aren't any aliens in the row, then remove the row from the movement queue and make index go down to one
                         let tempList = alienList.filter(alien => alien.row == currentRow);
-                        console.log("Living alien in row:", tempList);
+                        //console.log("Living alien in row:", tempList);
                         if(tempList.length <= 0){
                             let indexToDelete = alienMovementRows.findIndex(row => currentRow == row);
                             alienMovementRows.splice(indexToDelete, 1);
