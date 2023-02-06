@@ -442,7 +442,7 @@
                     console.log("Alien list: ", alienList);
                     console.log("Moving rows: ", alienMovementRows);*/
 
-                        score += alienPoints;
+                        addScore(alienPoints);
 
                         let currentColumn = currentAlien.column;
                         let currentRow = currentAlien.row;
@@ -509,7 +509,7 @@
                 currentUFO.posY, currentUFO.height)){
 
                         //Give random points after hitting!
-                        score += Math.floor(Math.random() * 6) * 50 + 50; //Score generated should be from 50 to 300
+                        addScore(Math.floor(Math.random() * 6) * 50 + 50); //Score generated should be from 50 to 300
                         
                         //Remove UFO
                         UFOList.splice(UFONo, 1);
@@ -726,6 +726,14 @@
         else if(event.keyCode == 65 && keyShoot == true) {
             keyShoot = false;
             //console.log('A was pressed');
+        }
+    }
+
+    var addScore = (points) => {
+        score += points;
+
+        if(score > highScore){
+            highScore = score;
         }
     }
 
