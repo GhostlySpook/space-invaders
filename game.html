@@ -65,7 +65,7 @@
     var alienDefaultFPSForMovement = 12;
     var alienDefaultFPSForProjectile = 120;
 
-    var alienReduceFPSWaitPercentage = 0.98;
+    var alienReduceFPSWaitPercentage = 0.97;
 
     var alienXLimitLeft = 50;
     var alienXLimitRight = 750;
@@ -749,18 +749,24 @@
         let totalAliens = alienList.length;
 
         if(totalAliens % alienRows == 0){
-            alienAcceleratedFPS *= alienReduceFPSWaitPercentage - Math.round(startingAliens / totalAliens) * 0.02;
+            alienAcceleratedFPS *= alienReduceFPSWaitPercentage - Math.round(startingAliens / totalAliens) * 0.04;
         }
 
-        if(totalAliens < alienRows){
-            alienAcceleratedFPS *= alienReduceFPSWaitPercentage - (alienRows / totalAliens) * 0.01;
+        if(totalAliens < alienColumns){
+            //alienAcceleratedFPS *= alienReduceFPSWaitPercentage - (alienColumns / totalAliens) * 0.1;
+            alienAcceleratedFPS = (totalAliens/alienColumns) * 1;
+        }
+        else{
+            alienAcceleratedFPS *= alienReduceFPSWaitPercentage;
+        }
+
+        /*if(totalAliens == 2){
+            alienAcceleratedFPS = 0.1;
         }
 
         if(totalAliens == 1){
-            alienAcceleratedFPS = 1;
-        }
-
-        alienAcceleratedFPS *= alienReduceFPSWaitPercentage;
+            alienAcceleratedFPS = 0;
+        }*/
 
         if(alienAcceleratedFPS <= 0){
             alienAcceleratedFPS = 0;
