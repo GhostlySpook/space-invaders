@@ -62,8 +62,10 @@
     var alienDirection = 1;
     var alienXMoveDistance = 10;
     var alienYMoveDistance = 10;
-    var alienDefaultFPSForMovement = 10;
+    var alienDefaultFPSForMovement = 12;
     var alienDefaultFPSForProjectile = 120;
+
+    var alienReduceFPSWaitPercentage = 0.98;
 
     var alienXLimitLeft = 50;
     var alienXLimitRight = 750;
@@ -76,7 +78,7 @@
     //UFO settings
     var UFOSpeed = 3;
     var UFOPoints = 50;
-    var UFOFramesForSpawn = fractions * 30;//FPS of game times the seconds each UFO takes to spawn
+    var UFOFramesForSpawn = fractions * 30; //FPS of game times the seconds each UFO takes to spawn
     var UFOWidth = 50;
     var UFOHeight = 20;
     var UFOXLeftLimit = 0; //Disappear once the left part touches the edge
@@ -122,6 +124,7 @@
     var alienX = 0;
     var alienY = alienYStart;
     var alienMovementFPS = 0;
+    var alienAcceleratedFPS = alienDefaultFPSForMovement;
     var alienFlagDirection = false;
     var alienReadyChangeDirection = false;
     var alienMovementRows = [];
@@ -131,7 +134,6 @@
     var enemyProjectileList = [];
     var alienProjectileFPS = 0;
 
-    //var UFO = null;
     var UFOCountSpawnFPS = 0;
     var UFOList = [];
 
@@ -234,7 +236,7 @@
         }
         
         //Move aliens when the time arrives and there ARE aliens
-        if(alienDefaultFPSForMovement <= alienMovementFPS && alienList.length > 0){
+        if(alienAcceleratedFPS <= alienMovementFPS && alienList.length > 0){
             //console.log("Current alien direction: ", alienDirection)
             //console.log("Alien moving row: ", alienCurrentMovementIndex);
             listLength = alienList.length;
@@ -434,6 +436,7 @@
                 //console.log(alienNo);
                 let currentAlien = alienList[alienNo];
 
+                //Check if alien was hit!
                 if(checkCollision(currentProjectile.posX, currentProjectile.width, 
                 currentProjectile.posY, currentProjectile.height, 
                 currentAlien.posX, currentAlien.width, 
@@ -443,6 +446,7 @@
                     console.log("Moving rows: ", alienMovementRows);*/
 
                         addScore(alienPoints);
+                        console.log(alienAcceleratedFPS);
 
                         let currentColumn = currentAlien.column;
                         let currentRow = currentAlien.row;
@@ -483,6 +487,8 @@
                                 }
                             }
                         }
+
+                        speedAliensUp();
 
                         /*console.log("Post-shot:");
                         console.log("Alien list: ", alienList);
@@ -734,6 +740,30 @@
 
         if(score > highScore){
             highScore = score;
+        }
+    }
+
+    //This is used after the alien is destroyed
+    var speedAliensUp = () => {
+        let startingAliens = alienRows * alienColumns;
+        let totalAliens = alienList.length;
+
+        if(totalAliens % alienRows == 0){
+            alienAcceleratedFPS *= alienReduceFPSWaitPercentage - Math.round(startingAliens / totalAliens) * 0.02;
+        }
+
+        if(totalAliens < alienRows){
+            alienAcceleratedFPS *= alienReduceFPSWaitPercentage - (alienRows / totalAliens) * 0.01;
+        }
+
+        if(totalAliens == 1){
+            alienAcceleratedFPS = 1;
+        }
+
+        alienAcceleratedFPS *= alienReduceFPSWaitPercentage;
+
+        if(alienAcceleratedFPS <= 0){
+            alienAcceleratedFPS = 0;
         }
     }
 
