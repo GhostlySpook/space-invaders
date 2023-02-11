@@ -26,6 +26,12 @@
     var imgShield = new Image();
     imgShield.src = "Shield.png";
 
+    var imgExplosion = new Image();
+    imgExplosion.src = "Explosion.png";
+
+    var imgAlienExplosion = new Image();
+    imgAlienExplosion.src = "EnemyExplosion.png";
+
     //////////////////////////////////
     //Game parameters
     //var gameStarted = 0;
@@ -50,6 +56,7 @@
     var playerProjectileHeight = 20;
     var playerProjectileWidth = 2;
     var maxPlayerProjectiles = 1;
+    var playerProjectileReloadTime = 30;
     var playerProjectileSpeed = 10;
     var playerProjectileYLimit = 50;
 
@@ -57,10 +64,10 @@
     var alienRows = 5;
     var alienColumns = 11;
 
-    var alienHeight = 20;
-    var alienWidth = 40;
+    var alienHeight = 22;
+    var alienWidth = 45;
     var alienDirection = 1;
-    var alienXMoveDistance = 10;
+    var alienXMoveDistance = 7;
     var alienYMoveDistance = 10;
     var alienDefaultFPSForMovement = 12;
     var alienDefaultFPSForProjectile = 120;
@@ -103,6 +110,17 @@
     var defaultShieldWidth = 90;
     var defaultShieldHeight = 40;
     var defaultShieldPosY = 450;
+
+    //Temp Sprites settings
+    //Explosions take the same time it takes for your projectile to disappear
+    var tempSpriteExplosionWidth = alienWidth;
+    var tempSpriteExplosionHeight = alienHeight;
+    var tempSpriteExplosionDuration = playerProjectileReloadTime;
+
+    var tempSpriteEnemyExplosionWidth = alienWidth;
+    var tempSpriteEnemyExplosionHeight = alienHeight;
+    var tempSpriteEnemyExplosionDuration = playerProjectileReloadTime;
+
     //End of parameters
 
     //Start loop
@@ -115,6 +133,7 @@
     var playerPosX = playerInitialPosX;
     var playerPosY = playerInitialPosY;
     var playerProjectileList = [];
+    var playerProjectileCurrentReload = 0;
 
     var keyLeft = false;
     var keyRight = false;
@@ -139,68 +158,15 @@
 
     var shieldList = [];
 
+    var tempSpriteList = [];
+
     var gameLoop = () => {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-        
-        //Draw score
-        ctx.font = "30px Arial";
-        ctx.fillStyle = "#ffffff";
-        txtScore = "Score: " + score;
-        ctx.fillText(txtScore, 10, 30);
-
-        txtHighscore = "Hi-Score: " + highScore;
-        ctx.fillText(txtHighscore, 300, 30);
-
-        //Draw aliens
-        let alienLength = alienList.length;
-        for(let alienNo = 0; alienNo < alienLength; alienNo++){
-            //console.log("Gone through alien no: ", alienNo);
-            let currentAlien = alienList[alienNo];
-            //console.log(currentAlien);
-            ctx.drawImage(imgAlien, currentAlien.posX, currentAlien.posY, currentAlien.width, currentAlien.height);
+        //Reduce reload waiting time
+        if(playerProjectileCurrentReload >= 0){
+            playerProjectileCurrentReload--;
         }
 
-        //Draw UFO
-        let UFOLength = UFOList.length;
-        for(let UFONo = 0; UFONo < UFOLength; UFONo++){
-            let currentUFO = UFOList[UFONo];
-            ctx.drawImage(imgUFO, currentUFO.posX, currentUFO.posY, currentUFO.width, currentUFO.height);
-        }
-
-        //Draw shields
-        let shieldLength = shieldList.length;
-        for(let shieldNo = 0; shieldNo < shieldLength; shieldNo++){
-            let currentShield = shieldList[shieldNo];
-            ctx.drawImage(imgShield, currentShield.posX, currentShield.posY, currentShield.width, currentShield.height);
-        }
-
-        //Draw player
-        ctx.drawImage(imgDefender, playerPosX, playerPosY, playerWidth, playerHeight);
-
-        //Draw friendly projectiles
-        let listLength = playerProjectileList.length;
-        for(let i = 0; i < listLength; i++){
-            let current = playerProjectileList[i];
-            ctx.drawImage(imgProjectile, current.posX, current.posY, current.width, current.height);
-        }
-
-        //Draw enemy projectiles
-        listLength = enemyProjectileList.length;
-        for(let i = 0; i < listLength; i++){
-            let current = enemyProjectileList[i];
-            ctx.drawImage(imgEnemyProjectile, current.posX, current.posY, current.width, current.height);
-        }
-
-        //Draw lives
-        ctx.font = "20px Arial";
-        ctx.fillText(lives, 10, 590);
-        let initialXDrawingPos = 50;
-        for(let i = 1; i < lives; i++){
-            ctx.drawImage(imgDefender, (35*i), 575, 30, 15)
-        }
-        ctx.fillStyle = "#00FF00"
-        ctx.fillRect(0, 565, 800, 3);
+        drawItems();
 
         //Check input and handle it
         if(keyLeft == true){
@@ -407,6 +373,7 @@
             for(let shieldNo = 0; shieldNo < shieldList.length; shieldNo++){
                 let currentShield = shieldList[shieldNo];
 
+                //Projectile hits shield
                 if(checkCollision(currentProjectile.posX, currentProjectile.width, 
                 currentProjectile.posY, currentProjectile.height, 
                 currentShield.posX, currentShield.width, 
@@ -445,56 +412,63 @@
                     console.log("Alien list: ", alienList);
                     console.log("Moving rows: ", alienMovementRows);*/
 
-                        addScore(alienPoints);
-                        console.log(alienAcceleratedFPS);
+                    addScore(alienPoints);
+                    //console.log(alienAcceleratedFPS);
 
-                        let currentColumn = currentAlien.column;
-                        let currentRow = currentAlien.row;
-                        alienList.splice(alienNo, 1);
-                        //console.log("Removing alien no: ", alienNo);
-                        removeProjectile = true;
+                    let currentPosX = currentAlien.posX;
+                    let currentPosY = currentAlien.posY;
+                    let currentColumn = currentAlien.column;
+                    let currentRow = currentAlien.row;
+                    alienList.splice(alienNo, 1);
+                    //console.log("Removing alien no: ", alienNo);
+                    removeProjectile = true;
 
-                        //Update aliens in bottom
-                        let lowestAlien = null;
-                        for(let i = 0; i < alienList.length; i++){
-                            if(currentColumn == alienList[i].column){
-                                if(lowestAlien == null){
-                                    lowestAlien = alienList[i];
-                                }
-                                else if(lowestAlien.row < alienList[i].row){
-                                    lowestAlien = alienList[i];
-                                }
+                    //Update aliens in bottom to know which should keep shooting
+                    let lowestAlien = null;
+                    for(let i = 0; i < alienList.length; i++){
+                        if(currentColumn == alienList[i].column){
+                            if(lowestAlien == null){
+                                lowestAlien = alienList[i];
+                            }
+                            else if(lowestAlien.row < alienList[i].row){
+                                lowestAlien = alienList[i];
                             }
                         }
+                    }
 
-                        if(lowestAlien != null){
-                            bottomAliens.push(lowestAlien);
-                        }
+                    if(lowestAlien != null){
+                        bottomAliens.push(lowestAlien);
+                    }
 
-                        bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
+                    bottomAliens = bottomAliens.filter(alien => !(alien.row == currentRow && alien.column == currentColumn));
 
-                        //Update living rows for aliens
-                        //If there aren't any aliens in the row, then remove the row from the movement queue and make index go down to one
-                        let tempList = alienList.filter(alien => alien.row == currentRow);
-                        //console.log("Living alien in row:", tempList);
-                        if(tempList.length <= 0){
-                            let indexToDelete = alienMovementRows.findIndex(row => currentRow == row);
-                            alienMovementRows.splice(indexToDelete, 1);
-                            if(indexToDelete <= alienCurrentMovementIndex){
-                                alienCurrentMovementIndex--;
-                                if(alienCurrentMovementIndex < 0){
-                                    alienCurrentMovementIndex = alienMovementRows.length - 1;
-                                }
+                    //Update living rows for aliens
+                    //If there aren't any aliens in the row, then remove the row from the movement queue and make index go down to one
+                    let tempList = alienList.filter(alien => alien.row == currentRow);
+                    //console.log("Living alien in row:", tempList);
+                    if(tempList.length <= 0){
+                        let indexToDelete = alienMovementRows.findIndex(row => currentRow == row);
+                        alienMovementRows.splice(indexToDelete, 1);
+                        if(indexToDelete <= alienCurrentMovementIndex){
+                            alienCurrentMovementIndex--;
+                            if(alienCurrentMovementIndex < 0){
+                                alienCurrentMovementIndex = alienMovementRows.length - 1;
                             }
                         }
+                    }
 
-                        speedAliensUp();
+                    speedAliensUp();
 
-                        /*console.log("Post-shot:");
-                        console.log("Alien list: ", alienList);
-                        console.log("Moving rows: ", alienMovementRows);*/
+                    //Create an explosion from the aliens!
+                    //Get the center of the alien and draw it there! Since it is the same size as the alien, just use their same position and measures
+                    addTempSprite(imgAlienExplosion, tempSpriteEnemyExplosionDuration, currentPosX, currentPosY, tempSpriteEnemyExplosionWidth, tempSpriteEnemyExplosionHeight);
+                    playerProjectileCurrentReload = playerProjectileReloadTime;
 
-                        break;
+                    /*console.log("Post-shot:");
+                    console.log("Alien list: ", alienList);
+                    console.log("Moving rows: ", alienMovementRows);*/
+
+                    break;
                 }
             }
 
@@ -618,7 +592,89 @@
                 projectileNo--;
             }
         }
+
+        //Pass time for temporal sprites
+        for(let spriteNo = 0; spriteNo < tempSpriteList.length; spriteNo++){
+            let currentSprite = tempSpriteList[spriteNo];
+            currentSprite.frames--;
+
+            if(currentSprite.frames <= 0){
+                tempSpriteList.splice(spriteNo, 1);
+                spriteNo--;
+            }
+        }
     };
+
+    var drawItems = () => {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+        
+        //Draw score
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "#ffffff";
+        txtScore = "Score: " + score;
+        ctx.fillText(txtScore, 10, 30);
+
+        txtHighscore = "Hi-Score: " + highScore;
+        ctx.fillText(txtHighscore, 300, 30);
+
+        //Draw aliens
+        let alienLength = alienList.length;
+        for(let alienNo = 0; alienNo < alienLength; alienNo++){
+            //console.log("Gone through alien no: ", alienNo);
+            let currentAlien = alienList[alienNo];
+            //console.log(currentAlien);
+            ctx.drawImage(imgAlien, currentAlien.posX, currentAlien.posY, currentAlien.width, currentAlien.height);
+        }
+
+        //Draw UFO
+        let UFOLength = UFOList.length;
+        for(let UFONo = 0; UFONo < UFOLength; UFONo++){
+            let currentUFO = UFOList[UFONo];
+            ctx.drawImage(imgUFO, currentUFO.posX, currentUFO.posY, currentUFO.width, currentUFO.height);
+        }
+
+        //Draw shields
+        let shieldLength = shieldList.length;
+        for(let shieldNo = 0; shieldNo < shieldLength; shieldNo++){
+            let currentShield = shieldList[shieldNo];
+            ctx.drawImage(imgShield, currentShield.posX, currentShield.posY, currentShield.width, currentShield.height);
+        }
+
+        //Draw player
+        ctx.drawImage(imgDefender, playerPosX, playerPosY, playerWidth, playerHeight);
+
+        //Draw friendly projectiles
+        let listLength = playerProjectileList.length;
+        for(let i = 0; i < listLength; i++){
+            let current = playerProjectileList[i];
+            ctx.drawImage(imgProjectile, current.posX, current.posY, current.width, current.height);
+        }
+
+        //Draw enemy projectiles
+        listLength = enemyProjectileList.length;
+        for(let i = 0; i < listLength; i++){
+            let current = enemyProjectileList[i];
+            ctx.drawImage(imgEnemyProjectile, current.posX, current.posY, current.width, current.height);
+        }
+
+        //Draw temp sprites
+        listLength = tempSpriteList.length;
+        for(let i = 0; i < listLength; i++){
+            let current = tempSpriteList[i];
+            ctx.drawImage(current.image, current.posX, current.posY, current.width, current.height);
+        }
+
+        //Draw lives
+        ctx.font = "20px Arial";
+        ctx.fillText(lives, 10, 590);
+        let initialXDrawingPos = 50;
+        for(let i = 1; i < lives; i++){
+            ctx.drawImage(imgDefender, (35*i), 575, 30, 15)
+        }
+        ctx.fillStyle = "#00FF00"
+        ctx.fillRect(0, 565, 800, 3);
+    }
 
     var restartGame = () => {
         //console.log("Restarted");
@@ -698,6 +754,8 @@
 
             shieldList.push(shield);
         }
+
+        tempSpriteList = [];
 
         gameInterval = setInterval(gameLoop, timeFraction);
 
@@ -780,4 +838,16 @@
             y2 + height2 > y1;
     }
 
+    var addTempSprite = (img, frames, posX, posY, width, height) => {
+        let sprite = {
+            image: img,
+            frames: frames,
+            posX: posX,
+            posY: posY,
+            width: width,
+            height: height
+        };
+
+        tempSpriteList.push(sprite);
+    }
 </script>
