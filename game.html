@@ -180,7 +180,7 @@
             }
         }
         if(keyShoot == true){
-            if(playerProjectileList.length < maxPlayerProjectiles && shotInputReleased == true){
+            if(playerProjectileList.length < maxPlayerProjectiles && shotInputReleased == true && playerProjectileCurrentReload <= 0){
                 //Shoot projectile
                 //Center projectile based on player
                 let centerPlayerX = playerPosX + (playerWidth / 2);
