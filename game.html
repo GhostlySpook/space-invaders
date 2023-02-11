@@ -530,6 +530,14 @@
 
             //Projectile reaches end of screen
             if(currentProjectile.posY <= playerProjectileYLimit){
+
+                //Draw the explosion! Get the center of x position, but not y
+                //Leave the explosion on the center of the projectile
+                let explosionX = (currentProjectile.posX + currentProjectile.width / 2) - (tempSpriteExplosionWidth / 2);
+
+                addTempSprite(imgExplosion, tempSpriteExplosionDuration, explosionX, currentProjectile.posY, tempSpriteExplosionWidth, tempSpriteExplosionHeight);
+                playerProjectileCurrentReload = playerProjectileReloadTime;
+
                 playerProjectileList.splice(projectileNo, 1);
                 projectileNo--;
             }
