@@ -56,7 +56,7 @@
     var playerProjectileHeight = 20;
     var playerProjectileWidth = 2;
     var maxPlayerProjectiles = 1;
-    var playerProjectileReloadTime = 30;
+    var playerProjectileReloadTime = 20;
     var playerProjectileSpeed = 10;
     var playerProjectileYLimit = 50;
 
@@ -516,9 +516,16 @@
                 current.posX, current.width, 
                 current.posY, current.height)){
 
-                        enemyProjectileList.splice(enemyProjectileNo, 1);
-                        removeProjectile = true;
-                        break;
+                    //Draw the explosion! Get the center of x position, but not y
+                    //Leave the explosion on the center of the projectile
+                    let explosionX = (currentProjectile.posX + currentProjectile.width / 2) - (tempSpriteExplosionWidth / 2);
+
+                    addTempSprite(imgExplosion, tempSpriteExplosionDuration, explosionX, currentProjectile.posY, tempSpriteExplosionWidth, tempSpriteExplosionHeight);
+                    playerProjectileCurrentReload = playerProjectileReloadTime;
+
+                    enemyProjectileList.splice(enemyProjectileNo, 1);
+                    removeProjectile = true;
+                    break;
                 }
             }
 
