@@ -81,6 +81,7 @@
     var alienYStart = 100;
 
     var alienPoints = 10;
+    var alienFrozenTime = playerProjectileReloadTime;
 
     //UFO settings
     var UFOSpeed = 3;
@@ -148,6 +149,8 @@
     var alienReadyChangeDirection = false;
     var alienMovementRows = [];
     var alienCurrentMovementIndex = 0;
+
+    var alienCurrentFrozenTime = 0;
     var bottomAliens = [];
 
     var enemyProjectileList = [];
@@ -201,8 +204,12 @@
             shotInputReleased = true;
         }
         
-        //Move aliens when the time arrives and there ARE aliens
-        if(alienAcceleratedFPS <= alienMovementFPS && alienList.length > 0){
+        //Move aliens when the time arrives and there ARE aliens, check if aliens aren't frozen too
+        if(alienCurrentFrozenTime >= 0){
+            alienCurrentFrozenTime--;
+        }
+        else{
+            if(alienAcceleratedFPS <= alienMovementFPS && alienList.length > 0){
             //console.log("Current alien direction: ", alienDirection)
             //console.log("Alien moving row: ", alienCurrentMovementIndex);
             listLength = alienList.length;
@@ -255,6 +262,7 @@
         }
         else{
             alienMovementFPS++;
+        }
         }
 
         //Check alien collision
@@ -463,6 +471,8 @@
                     //Get the center of the alien and draw it there! Since it is the same size as the alien, just use their same position and measures
                     addTempSprite(imgAlienExplosion, tempSpriteEnemyExplosionDuration, currentPosX, currentPosY, tempSpriteEnemyExplosionWidth, tempSpriteEnemyExplosionHeight);
                     playerProjectileCurrentReload = playerProjectileReloadTime;
+
+                    alienCurrentFrozenTime = alienFrozenTime;
 
                     /*console.log("Post-shot:");
                     console.log("Alien list: ", alienList);
@@ -709,6 +719,7 @@
         lives = defaultLives;
 
         //Add aliens to game
+        alienCurrentFrozenTime = 0;
         alienList = [];
         alienMovementRows = [];
         alienCurrentMovementIndex = alienRows - 1;
