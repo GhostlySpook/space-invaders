@@ -32,6 +32,9 @@
     var imgAlienExplosion = new Image();
     imgAlienExplosion.src = "EnemyExplosion.png";
 
+    var imgAlienProjectileExplosion = new Image();
+    imgAlienProjectileExplosion.src = "AlienProjectileExplosion.png";
+
     //////////////////////////////////
     //Game parameters
     //var gameStarted = 0;
@@ -83,6 +86,14 @@
     var alienPoints = 10;
     var alienFrozenTime = playerProjectileReloadTime;
 
+    //Enemy projectile settings
+    var enemyProjectileSpeed = 5;
+    var enemyProjectileChance = 1;
+    var enemyMaxProjectiles = 5;
+
+    var enemyProjectileHeight = 20;
+    var enemyProjectileWidth = 8;
+
     //UFO settings
     var UFOSpeed = 3;
     var UFOPoints = 50;
@@ -96,14 +107,6 @@
         RIGHT: 0,
         LEFT: 1
     }
-
-    //Enemy projectile settings
-    var enemyProjectileSpeed = 5;
-    var enemyProjectileChance = 1;
-    var enemyMaxProjectiles = 5;
-
-    var enemyProjectileHeight = 20;
-    var enemyProjectileWidth = 8;
 
     //Shield settings
     var defaultShields = 4;
@@ -122,7 +125,96 @@
     var tempSpriteEnemyExplosionHeight = alienHeight;
     var tempSpriteEnemyExplosionDuration = playerProjectileReloadTime;
 
+    var tempSpriteAlienProjectileExplosionWidth = 10;
+    var tempSpriteAlienProjectileExplosionHeight = 10;
+    var tempSpriteAlienProjectileExplosionDuration = 20;
+
     //End of parameters
+
+    //////////////////////////////////////////
+    //Create projectile explosion shape for destruction and shield shape
+    let conversionCanvas = document.createElement("canvas");
+    let conversionCtx = conversionCanvas.getContext("2d");
+
+    var defaultDestructibleObject;
+    var playerProjectileExplosionObject;
+    var enemyProjectileExplosionShape;
+
+    //Take imagedata and create a smaller shape resizing the image
+    imgShield.onload = () => {        
+        conversionCanvas.width = defaultShieldWidth;
+        conversionCanvas.height = defaultShieldHeight;
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        conversionCtx.drawImage(imgShield, 0, 0, defaultShieldWidth, defaultShieldHeight);
+        let shieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);
+
+        //This kind of object will have pixels which will act with their own hit detection
+        let defaultDestructibleObject = {
+            data: [],
+            width: defaultShieldWidth,
+            height: defaultShieldHeight
+        };
+        
+        for(let imagePointer = 0, destructiblePointer = 0; imagePointer < shieldImageData.data.length; imagePointer+=4, destructiblePointer++){
+            //If it isn't transparent, add a hit pixel
+            if(shieldImageData.data[imagePointer] != 0){
+                defaultDestructibleObject.data[destructiblePointer] = 1;
+            }
+            else{
+                defaultDestructibleObject.data[destructiblePointer] = 0;
+            }
+        }
+    }
+
+    imgExplosion.onload = () => {        
+        conversionCanvas.width = tempSpriteExplosionWidth;
+        conversionCanvas.height = tempSpriteExplosionHeight;
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        conversionCtx.drawImage(imgExplosion, 0, 0, tempSpriteExplosionWidth, tempSpriteExplosionHeight);
+        let explosionImageData = conversionCtx.getImageData(0, 0, tempSpriteExplosionWidth, tempSpriteExplosionHeight);
+
+        //This kind of object will have pixels which will act with their own hit detection
+        let playerProjectileExplosionObject = {
+            data: [],
+            width: tempSpriteExplosionWidth,
+            height: tempSpriteExplosionHeight
+        };
+        
+        for(let imagePointer = 0, destructiblePointer = 0; imagePointer < explosionImageData.data.length; imagePointer+=4, destructiblePointer++){
+            //If it isn't transparent, add a hit pixel
+            if(explosionImageData.data[imagePointer] != 0){
+                playerProjectileExplosionObject.data[destructiblePointer] = 1;
+            }
+            else{
+                playerProjectileExplosionObject.data[destructiblePointer] = 0;
+            }
+        }
+    }
+
+    imgAlienProjectileExplosion.onload = () => {        
+        conversionCanvas.width = tempSpriteAlienProjectileExplosionWidth;
+        conversionCanvas.height = tempSpriteAlienProjectileExplosionHeight;
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        conversionCtx.drawImage(imgAlienProjectileExplosion, 0, 0, tempSpriteAlienProjectileExplosionWidth, tempSpriteAlienProjectileExplosionHeight);
+        let explosionImageData = conversionCtx.getImageData(0, 0, tempSpriteAlienProjectileExplosionWidth, tempSpriteAlienProjectileExplosionHeight);
+
+        //This kind of object will have pixels which will act with their own hit detection
+        let alienProjectileExplosionObject = {
+            data: [],
+            width: tempSpriteAlienProjectileExplosionWidth,
+            height: tempSpriteAlienProjectileExplosionHeight
+        };
+        
+        for(let imagePointer = 0, destructiblePointer = 0; imagePointer < explosionImageData.data.length; imagePointer+=4, destructiblePointer++){
+            //If it isn't transparent, add a hit pixel
+            if(explosionImageData.data[imagePointer] != 0){
+                alienProjectileExplosionObject.data[destructiblePointer] = 1;
+            }
+            else{
+                alienProjectileExplosionObject.data[destructiblePointer] = 0;
+            }
+        }
+    }
 
     //Start loop
     var gameInterval;
@@ -169,6 +261,7 @@
             playerProjectileCurrentReload--;
         }
 
+        //Drawing function to draw everything
         drawItems();
 
         //Check input and handle it
