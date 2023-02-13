@@ -87,6 +87,7 @@
     var alienFrozenTime = playerProjectileReloadTime;
 
     //Enemy projectile settings
+    var enemyProjectileYLimit = 545;
     var enemyProjectileSpeed = 5;
     var enemyProjectileChance = 1;
     var enemyMaxProjectiles = 5;
@@ -117,7 +118,7 @@
 
     //Temp Sprites settings
     //Explosions take the same time it takes for your projectile to disappear
-    var tempSpriteExplosionWidth = alienWidth;
+    var tempSpriteExplosionWidth = 25;
     var tempSpriteExplosionHeight = alienHeight;
     var tempSpriteExplosionDuration = playerProjectileReloadTime;
 
@@ -125,8 +126,8 @@
     var tempSpriteEnemyExplosionHeight = alienHeight;
     var tempSpriteEnemyExplosionDuration = playerProjectileReloadTime;
 
-    var tempSpriteAlienProjectileExplosionWidth = 10;
-    var tempSpriteAlienProjectileExplosionHeight = 10;
+    var tempSpriteAlienProjectileExplosionWidth = 20;
+    var tempSpriteAlienProjectileExplosionHeight = 20;
     var tempSpriteAlienProjectileExplosionDuration = 20;
 
     //End of parameters
@@ -705,7 +706,8 @@
             }
 
             //Projectile reaches end of screen
-            if(currentProjectile.posY >= 550){
+            if(currentProjectile.posY >= enemyProjectileYLimit){
+                addTempSprite(imgAlienProjectileExplosion, tempSpriteAlienProjectileExplosionDuration, currentProjectile.posX, enemyProjectileYLimit, tempSpriteAlienProjectileExplosionWidth, tempSpriteAlienProjectileExplosionHeight);
                 enemyProjectileList.splice(projectileNo, 1);
                 projectileNo--;
             }
