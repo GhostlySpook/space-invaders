@@ -319,13 +319,15 @@
     var tempSpriteList = [];
 
     var gameLoop = () => {
+        //Drawing function to draw everything
+        drawItems();
+
+        //
+
         //Reduce reload waiting time
         if(playerProjectileCurrentReload >= 0){
             playerProjectileCurrentReload--;
         }
-
-        //Drawing function to draw everything
-        drawItems();
 
         //Check input and handle it
         if(keyLeft == true){
@@ -375,67 +377,91 @@
         }
         else{
             if(alienAcceleratedFPS <= alienMovementFPS && alienList.length > 0){
-            //console.log("Current alien direction: ", alienDirection)
-            //console.log("Alien moving row: ", alienCurrentMovementIndex);
-            listLength = alienList.length;
-            let lastRow = alienMovementRows[(alienMovementRows.length - 1)]
+                //console.log("Current alien direction: ", alienDirection)
+                //console.log("Alien moving row: ", alienCurrentMovementIndex);
+                listLength = alienList.length;
+                let lastRow = alienMovementRows[(alienMovementRows.length - 1)]
 
-            if(alienReadyChangeDirection){
-                if((alienMovementRows.length - 1) == alienCurrentMovementIndex){
-                    alienDirection *= -1;
+                //If it is time to make the aliens change directions, do and move
+                if(alienReadyChangeDirection){
+                    if((alienMovementRows.length - 1) == alienCurrentMovementIndex){
+                        alienDirection *= -1;
+                    }
+
+                    for(let alienNo = 0; alienNo < listLength; alienNo++){
+                        if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
+                            alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                            alienList[alienNo].posY += alienYMoveDistance;
+                        }
+
+                        if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
+                            alienFlagDirection = true;
+                        }
+
+                        if(alienCurrentMovementIndex == 0){
+                            alienFlagDirection = false;
+                            alienReadyChangeDirection = false;
+                        }
+                    }
+                }
+                else{
+                    //If not, move normally
+                    for(let alienNo = 0; alienNo < listLength; alienNo++){
+                        if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
+                            alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                        }
+
+                        if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
+                            alienFlagDirection = true;
+                        }
+                    }
                 }
 
-                for(let alienNo = 0; alienNo < listLength; alienNo++){
-                    if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
-                        alienList[alienNo].posX += alienDirection * alienXMoveDistance;
-                        alienList[alienNo].posY += alienYMoveDistance;
-                    }
+                if(alienCurrentMovementIndex == 0 && alienFlagDirection == true){
+                    alienReadyChangeDirection = true;
+                }
 
-                    if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
-                        alienFlagDirection = true;
-                    }
+                alienMovementFPS = 0;
 
-                    if(alienCurrentMovementIndex == 0){
-                        alienFlagDirection = false;
-                        alienReadyChangeDirection = false;
-                    }
+                alienCurrentMovementIndex--;
+                if(alienCurrentMovementIndex < 0){
+                    alienCurrentMovementIndex = alienMovementRows.length - 1;
                 }
             }
             else{
-                
-                for(let alienNo = 0; alienNo < listLength; alienNo++){
-                    if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
-                        alienList[alienNo].posX += alienDirection * alienXMoveDistance;
-                    }
+                alienMovementFPS++;
+            }
+        }
 
-                    if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
-                        alienFlagDirection = true;
+        //Collision with shields or player by bottom aliens
+        for(let i = 0; i < alienList.length; i++){
+            let currentAlien = alienList[i];
+
+            for(let shieldNo = 0; shieldNo < shieldList.length; shieldNo++){
+                //Collision with shields!
+                let currentShield = shieldList[shieldNo];
+
+                if(checkCollision(currentAlien.posX, currentAlien.width, 
+                    currentAlien.posY, currentAlien.height, 
+                    currentShield.posX, currentShield.width, 
+                    currentShield.posY, currentShield.height)){
+
+                    if(checkPixelCollision(currentShield.posX, currentShield.posY, currentShield.width, currentShield.height, currentShield.pixelCollision,
+                    currentAlien.posX, currentAlien.posY, currentAlien.width, currentAlien.height, currentAlien.pixelCollision)){
+                        damageShield(currentShield, currentAlien.pixelCollision, currentAlien.posX, currentAlien.posY);
                     }
                 }
             }
 
-            if(alienCurrentMovementIndex == 0 && alienFlagDirection == true){
-                alienReadyChangeDirection = true;
-            }
-
-            alienMovementFPS = 0;
-
-            alienCurrentMovementIndex--;
-            if(alienCurrentMovementIndex < 0){
-                alienCurrentMovementIndex = alienMovementRows.length - 1;
+            //Collision with the player
+            if(checkCollision(currentAlien.posX, currentAlien.width, 
+                    currentAlien.posY, currentAlien.height, 
+                    playerPosX, playerWidth, 
+                    playerPosY, playerHeight)){
+                
+                loseLife();
             }
         }
-        else{
-            alienMovementFPS++;
-        }
-        }
-
-        //Check alien collision
-        //TODO
-            //Check collision with shield
-            //TODO
-            //Check collision with player
-            //TODO
 
         //Create UFOs
         if(UFOCountSpawnFPS >= UFOFramesForSpawn){
@@ -797,10 +823,10 @@
 
                         //Deal damage to shield
                         let projectileCenterX = currentProjectile.posX + currentProjectile.width / 2;
-                        let explosionCenterX = projectileCenterX - enemyProjectileExplosionObject.width / 2;
+                        let explosionX = projectileCenterX - enemyProjectileExplosionObject.width / 2;
 
                         //Generate new image for the shield alongside dealing damage
-                        damageShield(currentShield, enemyProjectileExplosionObject, explosionCenterX, currentProjectile.posY);
+                        damageShield(currentShield, enemyProjectileExplosionObject, explosionX, currentProjectile.posY);
                         
                         /*conversionCanvas.width = defaultShieldWidth
                         conversionCanvas.height = defaultShieldHeight;
@@ -826,7 +852,7 @@
             currentProjectile.posY, currentProjectile.height,
             playerPosX, playerWidth, playerPosY, playerHeight)){
                 //TODO Activate game over check and all that
-                lives--;
+                loseLife();
                 removeProjectile = true;
             }
 
@@ -966,6 +992,18 @@
             let currentX = initialX;
 
             for(let column = 0; column < alienColumns; column++){
+                //Make the pixel collision rectangular
+                let totalPixels = alienWidth * alienHeight;
+                let collisionData = [];
+                for(let i = 0; i < totalPixels; i++){
+                    collisionData.push(1);
+                }
+
+                let newPixelCollision = {
+                    data: collisionData,
+                    width: alienWidth,
+                    height: alienHeight
+                }
 
                 let alien = {
                     row: row,
@@ -973,7 +1011,8 @@
                     posX: currentX,
                     posY: currentY,
                     width: alienWidth,
-                    height: alienHeight
+                    height: alienHeight,
+                    pixelCollision: newPixelCollision
                 };
 
                 alienList.push(alien);
@@ -1109,6 +1148,14 @@
     }
 
     var loseLife = () => {
+        lives--;
+
+        if(lives <= 0){
+            gameOver();
+        }
+    }
+
+    var gameOver = () => {
         let a = 0;
     }
 
