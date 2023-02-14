@@ -15,6 +15,12 @@
     //imgDefender.src = "https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/e4af22756166f44.png";
     imgDefender.src = "Defender.png";
 
+    var imgDefenderExplode1 = new Image();
+    imgDefenderExplode1.src = "DefenderExplode1.png";
+
+    var imgDefenderExplode2 = new Image();
+    imgDefenderExplode2.src = "DefenderExplode2.png";
+
     var imgProjectile = new Image();
     imgProjectile.src = "Bullet.png";
 
@@ -62,8 +68,10 @@
     var maxPlayerProjectiles = 1;
     var playerProjectileReloadTime = 20;
     var playerProjectileSpeed = 10;
-    //var playerProjectileSpeed = 2;
     var playerProjectileYLimit = 50;
+
+    var downedAnimationDelay = 1000 / (5/*FPS*/);
+    var downedLoops = 12;
 
     //Alien settings
     var alienRows = 5;
@@ -290,6 +298,11 @@
     var playerPosY = playerInitialPosY;
     var playerProjectileList = [];
     var playerProjectileCurrentReload = 0;
+    var playerCurrentImage = imgDefender;
+
+    //Player lost life related
+    var playerDownedCurrent = 0;
+    var downedCurrentLoop = 0;
 
     var keyLeft = false;
     var keyRight = false;
@@ -322,53 +335,11 @@
         //Drawing function to draw everything
         drawItems();
 
-        //
+        handleInput();
 
         //Reduce reload waiting time
         if(playerProjectileCurrentReload >= 0){
             playerProjectileCurrentReload--;
-        }
-
-        //Check input and handle it
-        if(keyLeft == true){
-            if((playerPosX - playerSpeed) >= playerLimitXLeft){
-                playerPosX -= playerSpeed;
-            }
-        }
-        if(keyRight == true){
-            if((playerPosX + playerWidth + playerSpeed) <= playerLimitXRight){
-                playerPosX += playerSpeed;
-            }
-        }
-        if(keyShoot == true){
-            if(playerProjectileList.length < maxPlayerProjectiles && shotInputReleased == true && playerProjectileCurrentReload <= 0){
-                //Shoot projectile
-                //Center projectile based on player
-                let centerPlayerX = playerPosX + (playerWidth / 2);
-                let projectileX = centerPlayerX - (playerProjectileWidth / 2);
-
-                let newPixelCollision = {
-                    data: playerProjectileObject.data.slice(),
-                    width: enemyProjectileWidth,
-                    height: enemyProjectileHeight
-                };
-
-                let projectile = {
-                    posX: projectileX,
-                    posY: playerPosY,
-                    width: playerProjectileWidth,
-                    height: playerProjectileHeight,
-                    pixelCollision: newPixelCollision
-                };
-
-                //console.log("New projectile:", projectile);
-
-                playerProjectileList.push(projectile);
-            }
-            shotInputReleased = false;
-        }
-        else if(keyShoot == false){
-            shotInputReleased = true;
         }
         
         //Move aliens when the time arrives and there ARE aliens, check if aliens aren't frozen too
@@ -885,6 +856,32 @@
         }
     };
 
+    var downedLoop = () => {
+        if(playerCurrentImage == imgDefenderExplode1){
+            playerCurrentImage = imgDefenderExplode2
+        }
+        else{
+            playerCurrentImage = imgDefenderExplode1
+        }
+
+        drawItems();
+
+        downedCurrentLoop++;
+
+        if(downedCurrentLoop >= downedLoops){
+            playerCurrentImage = imgDefender;
+
+            clearInterval(gameInterval);
+
+            if(lives <= 0){
+                gameOver();
+            }
+            else{
+                gameInterval = setInterval(gameLoop, timeFraction);
+            }
+        }
+    }
+
     var drawItems = () => {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
@@ -925,7 +922,7 @@
         }
 
         //Draw player
-        ctx.drawImage(imgDefender, playerPosX, playerPosY, playerWidth, playerHeight);
+        ctx.drawImage(playerCurrentImage, playerPosX, playerPosY, playerWidth, playerHeight);
 
         //Draw friendly projectiles
         let listLength = playerProjectileList.length;
@@ -959,6 +956,50 @@
         ctx.fillRect(0, 565, 800, 3);
     }
 
+    var handleInput = () => {
+        //Check input and handle it
+        if(keyLeft == true){
+            if((playerPosX - playerSpeed) >= playerLimitXLeft){
+                playerPosX -= playerSpeed;
+            }
+        }
+        if(keyRight == true){
+            if((playerPosX + playerWidth + playerSpeed) <= playerLimitXRight){
+                playerPosX += playerSpeed;
+            }
+        }
+        if(keyShoot == true){
+            if(playerProjectileList.length < maxPlayerProjectiles && shotInputReleased == true && playerProjectileCurrentReload <= 0){
+                //Shoot projectile
+                //Center projectile based on player
+                let centerPlayerX = playerPosX + (playerWidth / 2);
+                let projectileX = centerPlayerX - (playerProjectileWidth / 2);
+
+                let newPixelCollision = {
+                    data: playerProjectileObject.data.slice(),
+                    width: enemyProjectileWidth,
+                    height: enemyProjectileHeight
+                };
+
+                let projectile = {
+                    posX: projectileX,
+                    posY: playerPosY,
+                    width: playerProjectileWidth,
+                    height: playerProjectileHeight,
+                    pixelCollision: newPixelCollision
+                };
+
+                //console.log("New projectile:", projectile);
+
+                playerProjectileList.push(projectile);
+            }
+            shotInputReleased = false;
+        }
+        else if(keyShoot == false){
+            shotInputReleased = true;
+        }
+    }
+
     var restartGame = () => {
         //console.log("Restarted");
         
@@ -981,6 +1022,7 @@
         alienList = [];
         alienMovementRows = [];
         alienCurrentMovementIndex = alienRows - 1;
+        var alienFlagDirection = false;
         let initialX = 400 - ((alienColumns * alienWidth + alienXSeparation * (alienColumns - 1)) / 2);        
         let initialY = alienYStart;
         let currentY = initialY;
@@ -1150,13 +1192,31 @@
     var loseLife = () => {
         lives--;
 
-        if(lives <= 0){
+        clearInterval(gameInterval);
+        playerCurrentImage = imgDefenderExplode1;
+        drawItems();
+
+        downedCurrentLoop = 0;
+        gameInterval = setInterval(downedLoop, downedAnimationDelay);
+
+        /*if(lives <= 0){
             gameOver();
-        }
+        }*/
     }
 
     var gameOver = () => {
-        let a = 0;
+        if(gameInterval != null){
+            clearInterval(gameInterval);
+        }
+
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
+
+        //Draw score
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "#ffffff";
+        txtScore = "Game over";
+        ctx.fillText(txtScore, 300, 100);
     }
 
     var checkCollision = (x1, width1, y1, height1, x2, width2, y2, height2) => {
