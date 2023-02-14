@@ -324,6 +324,9 @@
             playerProjectileCurrentReload--;
         }
 
+        //Drawing function to draw everything
+        drawItems();
+
         //Check input and handle it
         if(keyLeft == true){
             if((playerPosX - playerSpeed) >= playerLimitXLeft){
@@ -841,8 +844,7 @@
             }
         }
 
-        //Drawing function to draw everything
-        drawItems();
+        
         
         //Pass time for temporal sprites
         for(let spriteNo = 0; spriteNo < tempSpriteList.length; spriteNo++){
