@@ -1,5 +1,6 @@
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 <button id="startButton" onClick="restartGame()">Restart Game</button>
+<canvas id = "debuggingCanvas" width="800" height="600"></canvas>
 <script>
     //Define canvas
     var gameCanvas = document.getElementById("gameCanvas");
@@ -61,6 +62,7 @@
     var maxPlayerProjectiles = 1;
     var playerProjectileReloadTime = 20;
     var playerProjectileSpeed = 10;
+    //var playerProjectileSpeed = 2;
     var playerProjectileYLimit = 50;
 
     //Alien settings
@@ -137,9 +139,15 @@
     let conversionCanvas = document.createElement("canvas");
     let conversionCtx = conversionCanvas.getContext("2d");
 
+    let debuggingCanvas = document.getElementById("debuggingCanvas");
+    let debuggingCtx = debuggingCanvas.getContext("2d");
+    debuggingCanvas.style.background = "pink";
+
     var defaultDestructibleObject;
+    var playerProjectileObject;
     var playerProjectileExplosionObject;
-    var enemyProjectileExplosionShape;
+    var enemyProjectileObject;
+    var enemyProjectileExplosionObject;
 
     //Take imagedata and create a smaller shape resizing the image
     imgShield.onload = () => {        
@@ -150,19 +158,46 @@
         let shieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);
 
         //This kind of object will have pixels which will act with their own hit detection
-        let defaultDestructibleObject = {
+        defaultDestructibleObject = {
             data: [],
             width: defaultShieldWidth,
             height: defaultShieldHeight
         };
         
-        for(let imagePointer = 0, destructiblePointer = 0; imagePointer < shieldImageData.data.length; imagePointer+=4, destructiblePointer++){
+        for(let imagePointer = 3, destructiblePointer = 0; imagePointer < shieldImageData.data.length; imagePointer+=4, destructiblePointer++){
             //If it isn't transparent, add a hit pixel
             if(shieldImageData.data[imagePointer] != 0){
                 defaultDestructibleObject.data[destructiblePointer] = 1;
             }
             else{
                 defaultDestructibleObject.data[destructiblePointer] = 0;
+            }
+        }
+
+        console.log("Test", defaultDestructibleObject);
+    }
+
+    imgProjectile.onload = () => {        
+        conversionCanvas.width = playerProjectileWidth;
+        conversionCanvas.height = playerProjectileHeight;
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        conversionCtx.drawImage(imgProjectile, 0, 0, playerProjectileWidth, playerProjectileHeight);
+        let projectileImageData = conversionCtx.getImageData(0, 0, playerProjectileWidth, playerProjectileHeight);
+
+        //This kind of object will have pixels which will act with their own hit detection
+        playerProjectileObject = {
+            data: [],
+            width: playerProjectileWidth,
+            height: playerProjectileHeight
+        };
+        
+        for(let imagePointer = 3, destructiblePointer = 0; imagePointer < projectileImageData.data.length; imagePointer+=4, destructiblePointer++){
+            //If it isn't transparent, add a hit pixel
+            if(projectileImageData.data[imagePointer] != 0){
+                playerProjectileObject.data[destructiblePointer] = 1;
+            }
+            else{
+                playerProjectileObject.data[destructiblePointer] = 0;
             }
         }
     }
@@ -175,19 +210,44 @@
         let explosionImageData = conversionCtx.getImageData(0, 0, tempSpriteExplosionWidth, tempSpriteExplosionHeight);
 
         //This kind of object will have pixels which will act with their own hit detection
-        let playerProjectileExplosionObject = {
+        playerProjectileExplosionObject = {
             data: [],
             width: tempSpriteExplosionWidth,
             height: tempSpriteExplosionHeight
         };
         
-        for(let imagePointer = 0, destructiblePointer = 0; imagePointer < explosionImageData.data.length; imagePointer+=4, destructiblePointer++){
+        for(let imagePointer = 3, destructiblePointer = 0; imagePointer < explosionImageData.data.length; imagePointer+=4, destructiblePointer++){
             //If it isn't transparent, add a hit pixel
             if(explosionImageData.data[imagePointer] != 0){
                 playerProjectileExplosionObject.data[destructiblePointer] = 1;
             }
             else{
                 playerProjectileExplosionObject.data[destructiblePointer] = 0;
+            }
+        }
+    }
+
+    imgEnemyProjectile.onload = () => {        
+        conversionCanvas.width = enemyProjectileWidth;
+        conversionCanvas.height = enemyProjectileHeight;
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        conversionCtx.drawImage(imgEnemyProjectile, 0, 0, enemyProjectileWidth, enemyProjectileHeight);
+        let projectileImageData = conversionCtx.getImageData(0, 0, enemyProjectileWidth, enemyProjectileHeight);
+
+        //This kind of object will have pixels which will act with their own hit detection
+        enemyProjectileObject = {
+            data: [],
+            width: enemyProjectileWidth,
+            height: enemyProjectileHeight
+        };
+        
+        for(let imagePointer = 3, destructiblePointer = 0; imagePointer < projectileImageData.data.length; imagePointer+=4, destructiblePointer++){
+            //If it isn't transparent, add a hit pixel
+            if(enemyProjectileObject.data[imagePointer] != 0){
+                enemyProjectileObject.data[destructiblePointer] = 1;
+            }
+            else{
+                enemyProjectileObject.data[destructiblePointer] = 0;
             }
         }
     }
@@ -200,21 +260,23 @@
         let explosionImageData = conversionCtx.getImageData(0, 0, tempSpriteAlienProjectileExplosionWidth, tempSpriteAlienProjectileExplosionHeight);
 
         //This kind of object will have pixels which will act with their own hit detection
-        let alienProjectileExplosionObject = {
+        enemyProjectileExplosionObject = {
             data: [],
             width: tempSpriteAlienProjectileExplosionWidth,
             height: tempSpriteAlienProjectileExplosionHeight
         };
         
-        for(let imagePointer = 0, destructiblePointer = 0; imagePointer < explosionImageData.data.length; imagePointer+=4, destructiblePointer++){
+        for(let imagePointer = 3, destructiblePointer = 0; imagePointer < explosionImageData.data.length; imagePointer+=4, destructiblePointer++){
             //If it isn't transparent, add a hit pixel
             if(explosionImageData.data[imagePointer] != 0){
-                alienProjectileExplosionObject.data[destructiblePointer] = 1;
+                enemyProjectileExplosionObject.data[destructiblePointer] = 1;
             }
             else{
-                alienProjectileExplosionObject.data[destructiblePointer] = 0;
+                enemyProjectileExplosionObject.data[destructiblePointer] = 0;
             }
         }
+
+        //console.log(alienProjectileExplosionObject);
     }
 
     //Start loop
@@ -262,9 +324,6 @@
             playerProjectileCurrentReload--;
         }
 
-        //Drawing function to draw everything
-        drawItems();
-
         //Check input and handle it
         if(keyLeft == true){
             if((playerPosX - playerSpeed) >= playerLimitXLeft){
@@ -283,12 +342,21 @@
                 let centerPlayerX = playerPosX + (playerWidth / 2);
                 let projectileX = centerPlayerX - (playerProjectileWidth / 2);
 
+                let newPixelCollision = {
+                    data: playerProjectileObject.data.slice(),
+                    width: enemyProjectileWidth,
+                    height: enemyProjectileHeight
+                };
+
                 let projectile = {
                     posX: projectileX,
                     posY: playerPosY,
                     width: playerProjectileWidth,
-                    height: playerProjectileHeight 
+                    height: playerProjectileHeight,
+                    pixelCollision: newPixelCollision
                 };
+
+                //console.log("New projectile:", projectile);
 
                 playerProjectileList.push(projectile);
             }
@@ -428,7 +496,7 @@
         }
 
         //Create enemy projectiles
-        if(alienDefaultFPSForProjectile <= alienProjectileFPS && alienList.length > 0){
+        if(alienDefaultFPSForProjectile <= alienProjectileFPS && alienList.length > 0 && alienCurrentFrozenTime <= 0){
             listLength = alienList.length;
 
             //Select a random alien from the bottom and shoot
@@ -436,12 +504,22 @@
 
             let projectileX = randomAlien.posX + (randomAlien.width / 2);
 
+            let newPixelCollision = {
+                data: enemyProjectileObject.data.slice(),
+                width: enemyProjectileWidth,
+                height: enemyProjectileHeight
+            };
+
             let enemyProjectile = {
                 posX: projectileX,
                 posY: (randomAlien.posY + randomAlien.height),
                 width: enemyProjectileWidth,
-                height: enemyProjectileHeight
+                height: enemyProjectileHeight,
+                pixelCollision: newPixelCollision
             };
+
+            //console.log(enemyProjectile);
+
             enemyProjectileList.push(enemyProjectile);
 
             alienProjectileFPS = 0;
@@ -480,16 +558,48 @@
                 currentProjectile.posY, currentProjectile.height, 
                 currentShield.posX, currentShield.width, 
                 currentShield.posY, currentShield.height)){
-                        currentShield.health--;
+                    //console.log("Projectile is in shield proximity");
+
+                    //console.log("Projectile:", currentProjectile);
+                    //console.log("Shield:", currentShield);
+
+                    if(checkPixelCollision(currentShield.posX, currentShield.posY, currentShield.width, currentShield.height, currentShield.pixelCollision,
+                    currentProjectile.posX, currentProjectile.posY, currentProjectile.width, currentProjectile.height, currentProjectile.pixelCollision)){
+                        //console.log("Projectile collided with shield");
+                        
+                        /*if(currentShield.health <= 0){
+                            shieldList.splice(shieldNo, 1);
+                            //Creo que no se ocupa al ser destruido el proyectil
+                            //shieldNo--;
+                        }*/
+
+                        //Deal damage to shield
+                        let projectileCenterX = currentProjectile.posX + currentProjectile.width / 2;
+                        let explosionCenterX = projectileCenterX - playerProjectileExplosionObject.width / 2;
+
+                        //console.log("playerProjectileExplosion: ", playerProjectileExplosionObject);
+
+                        //Generate new image for the shield alongside dealing damage
+                        damageShield(currentShield, playerProjectileExplosionObject, explosionCenterX, currentProjectile.posY);
+                        
+                        /*conversionCanvas.width = defaultShieldWidth
+                        conversionCanvas.height = defaultShieldHeight;
+                        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+                        conversionCtx.drawImage(imgShield, 0, 0, defaultShieldWidth, defaultShieldHeight);
+                        currentShield.image = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);*/
+
+                        removeProjectile = true;
+                        break;
+                    }
+
+
+                        /*currentShield.health--;
 
                         if(currentShield.health <= 0){
                             shieldList.splice(shieldNo, 1);
                             //Creo que no se ocupa al ser destruido el proyectil
                             //shieldNo--;
-                        }
-
-                        removeProjectile = true;
-                        break;
+                        }*/
                 }
 
             }
@@ -666,20 +776,38 @@
             for(let shieldNo = 0; shieldNo < shieldList.length; shieldNo++){
                 let currentShield = shieldList[shieldNo];
 
+                //Projectile hit shield!
                 if(checkCollision(currentProjectile.posX, currentProjectile.width, 
                 currentProjectile.posY, currentProjectile.height, 
                 currentShield.posX, currentShield.width, 
                 currentShield.posY, currentShield.height)){
-                        currentShield.health--;
+                    //currentShield.health--;
 
-                        if(currentShield.health <= 0){
+                    if(checkPixelCollision(currentShield.posX, currentShield.posY, currentShield.width, currentShield.height, currentShield.pixelCollision,
+                    currentProjectile.posX, currentProjectile.posY, currentProjectile.width, currentProjectile.height, currentProjectile.pixelCollision)){
+                        
+                        /*if(currentShield.health <= 0){
                             shieldList.splice(shieldNo, 1);
                             //Creo que no se ocupa al ser destruido el proyectil
                             //shieldNo--;
-                        }
+                        }*/
+
+                        //Deal damage to shield
+                        let projectileCenterX = currentProjectile.posX + currentProjectile.width / 2;
+                        let explosionCenterX = projectileCenterX - enemyProjectileExplosionObject.width / 2;
+
+                        //Generate new image for the shield alongside dealing damage
+                        damageShield(currentShield, enemyProjectileExplosionObject, explosionCenterX, currentProjectile.posY);
+                        
+                        /*conversionCanvas.width = defaultShieldWidth
+                        conversionCanvas.height = defaultShieldHeight;
+                        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+                        conversionCtx.drawImage(imgShield, 0, 0, defaultShieldWidth, defaultShieldHeight);
+                        currentShield.image = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);*/
 
                         removeProjectile = true;
                         break;
+                    }
                 }
 
             }
@@ -713,8 +841,12 @@
             }
         }
 
+        //Drawing function to draw everything
+        drawItems();
+        
         //Pass time for temporal sprites
         for(let spriteNo = 0; spriteNo < tempSpriteList.length; spriteNo++){
+            
             let currentSprite = tempSpriteList[spriteNo];
             currentSprite.frames--;
 
@@ -758,7 +890,10 @@
         let shieldLength = shieldList.length;
         for(let shieldNo = 0; shieldNo < shieldLength; shieldNo++){
             let currentShield = shieldList[shieldNo];
-            ctx.drawImage(imgShield, currentShield.posX, currentShield.posY, currentShield.width, currentShield.height);
+            //console.log(currentShield.image);
+            ctx.drawImage(currentShield.image, currentShield.posX, currentShield.posY, currentShield.width, currentShield.height);
+            //console.log(currentShield.image);
+            //ctx.putImageData(currentShield.image, currentShield.posX, currentShield.posY);
         }
 
         //Draw player
@@ -863,12 +998,31 @@
         for(let shieldNo = 0; shieldNo < defaultShields; shieldNo++){
             currentX += halfShieldSeparation;
 
+            //Create a destructible object for the shield
+            let newPixelCollision = {
+                data: defaultDestructibleObject.data.slice(),
+                width: defaultDestructibleObject.width,
+                height: defaultDestructibleObject.height
+            };
+
+            //Give each image object their own
+            conversionCanvas.width = defaultShieldWidth;
+            conversionCanvas.height = defaultShieldHeight;
+            conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+            conversionCtx.drawImage(imgShield, 0, 0, defaultShieldWidth, defaultShieldHeight);
+            
+            //let shieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);
+            let shieldImage = new Image();
+            shieldImage.src = conversionCanvas.toDataURL();
+
             let shield = {
                 width: defaultShieldWidth,
                 height: defaultShieldHeight,
                 posX: currentX,
                 posY: defaultShieldPosY,
-                health: defaultShieldHealth
+                health: defaultShieldHealth,
+                pixelCollision: newPixelCollision,
+                image: shieldImage
             };
 
             currentX += defaultShieldWidth;
@@ -952,11 +1106,165 @@
         }
     }
 
-    var checkCollision = (x1, width1, y1, height1, x2, width2, y2, height2) =>{
+    var loseLife = () => {
+        let a = 0;
+    }
+
+    var checkCollision = (x1, width1, y1, height1, x2, width2, y2, height2) => {
         return x1 + width1 > x2 && 
             x2 + width2 > x1 && 
             y1 + height1 > y2 &&
             y2 + height2 > y1;
+    }
+
+    var checkPixelCollision = (xA, yA, widthA, heightA, pCA, xB, yB, widthB, heightB, pCB) => {
+        //Adjust the difference in position
+        let differenceX = xB - xA;
+        let differenceY = yB - yA;
+
+        for(let aRow = 0; aRow < heightA; aRow++){
+            //Skip row B if row A is above the row B
+            if(aRow < differenceY){
+                continue;
+            }
+
+            //Skip row B if row A is under the row B
+            if(aRow > heightB - 1 + differenceY){
+                continue;
+            }
+
+            for(let aCol = 0; aCol < widthA; aCol++){
+
+                //Skip col B if col A is left of the col B
+                if(aCol < differenceX){
+                    continue;
+                }
+
+                //Skip col B if col A is right of the col B
+                if(aCol > widthB - 1 + differenceX){
+                    continue;
+                }
+
+                //Skip if there isn't anything to collide
+                let aPointer = aCol + widthA * aRow;
+                if(pCA.data[aPointer] == 0){
+                    continue;
+                }
+
+                for(let bRow = 0; bRow < heightB; bRow++){
+                    for(let bCol = 0; bCol < widthB; bCol++){
+                        let bPointer = bCol + widthB * bRow;
+
+                        //Skip if there isn't anything to collide with
+                        if(pCB.data[bPointer] == 0){
+                            continue;
+                        }
+                        else{
+                            return true;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return false;
+    }
+
+    var damageShield = (shield, shape, shapeX, shapeY) => {
+        //A is shield
+        //B is damage shape
+        //console.log("Shield object: ", shield);
+        //console.log("Explosion shape:", shape);
+
+        let listPixelsToChange = [];
+
+        //Adjust the difference in position
+        let differenceX = shapeX - shield.posX;
+        let differenceY = shapeY - shield.posY;
+
+        for(let aRow = 0; aRow < shield.width; aRow++){
+            //Skip row B if row A is above the row B
+            if(aRow < differenceY){
+                continue;
+            }
+
+            //Skip row B if row A is under the row B
+            if(aRow > shape.height - 1 + differenceY){
+                continue;
+            }
+
+            for(let aCol = 0; aCol < shield.width; aCol++){
+
+                //Skip col B if col A is left of the col B
+                if(aCol < differenceX){
+                    continue;
+                }
+
+                //Skip col B if col A is right of the col B
+                if(aCol > shape.width - 1 + differenceX){
+                    continue;
+                }
+
+                //Skip if there isn't anything to collide
+                let aPointer = aCol + shield.width * aRow;
+                if(shield.pixelCollision.data[aPointer] == 0){
+                    continue;
+                }
+
+                for(let bRow = 0; bRow < shape.height; bRow++){
+                    for(let bCol = 0; bCol < shape.width; bCol++){
+                        let bPointer = bCol + shape.width * bRow;
+
+                        //Skip if there isn't anything to collide with
+                        if(shape.data[bPointer] == 0){
+                            continue;
+                        }
+                        else{
+                            //This should be when there is a collision!
+                            //Remove the part where there is a collision
+                            //console.log("Collision position:", aPointer);
+                            shield.pixelCollision.data[aPointer] = 0;
+
+                            //Add pixel to change and position to list
+                            listPixelsToChange.push(aPointer);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        //console.log("Remove spaces phase");
+
+        //Remove the empty spaces from the shield image
+        conversionCanvas.width = defaultShieldWidth
+        conversionCanvas.height = defaultShieldHeight;
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        conversionCtx.drawImage(shield.image, 0, 0, defaultShieldWidth, defaultShieldHeight);
+
+        let tempShieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight)
+
+        //Remove the empty spaces from the image using the list of collision obtained
+        for(let pointer = 0; pointer < listPixelsToChange.length; pointer++){
+            let pixelPosition = listPixelsToChange[pointer];
+
+            let imagePixelPosition = 4 * pixelPosition;
+
+            tempShieldImageData.data[imagePixelPosition] = 0;
+            tempShieldImageData.data[imagePixelPosition + 1] = 0;
+            tempShieldImageData.data[imagePixelPosition + 2] = 0;
+            tempShieldImageData.data[imagePixelPosition + 3] = 0;
+        }
+
+        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+        //conversionCtx.putImageData(tempShieldImageData, 0, 0, defaultShieldWidth, defaultShieldHeight);
+        conversionCtx.putImageData(tempShieldImageData, 0, 0);
+        
+        //let shieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);
+        shield.image.src = conversionCanvas.toDataURL();
+
+        //console.log("Ended removal spaces phase");
     }
 
     var addTempSprite = (img, frames, posX, posY, width, height) => {
