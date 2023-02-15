@@ -85,7 +85,8 @@
     var screenHeight = 600;
 
     var defaultLives = 3;
-    var defaultHighscore = 1000;
+    var defaultHighscore = 1500;
+    var scoreForLife = 1500;
 
     var milisecondsBeforeNewRound = 5000;
     
@@ -330,6 +331,7 @@
 
     var score = 0;
     var highScore = defaultHighscore;
+    var accumulatedScore = 0;
     
     var lives = defaultLives;
     var playerPosX = playerInitialPosX;
@@ -1234,13 +1236,20 @@
 
     var addScore = (points) => {
         score += points;
+        accumulatedScore += points;
+
+        let newScore = 0;
+        let extra_lives = 0;
 
         if(score > highScore){
             highScore = score;
         }
 
-        if(score > defaultHighscore){
-            lives++;
+        //Extra life calculation
+        if(accumulatedScore >= scoreForLife){
+            newScore = accumulatedScore % scoreForLife;
+            lives += Math.round((accumulatedScore - newScore) / scoreForLife);
+            accumulatedScore = newScore;
         }
     }
 
@@ -1334,12 +1343,6 @@
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
         //gameStarted = 1;
-
-        //Prepare score
-        score = 0;
-
-        //Prepare lives
-        lives = defaultLives;
 
         //Add aliens to game
         alienCurrentFrozenTime = 0;
