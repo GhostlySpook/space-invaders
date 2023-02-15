@@ -1244,12 +1244,19 @@
         document.removeEventListener('keyup', handleKeyUp);
         //gameStarted = 1;
 
+        keyLeft = false;
+        keyRight = false;
+        keyShoot = false;
+
         //Add aliens to game
         alienCurrentFrozenTime = 0;
         alienList = [];
         bottomAliens = [];
         alienMovementRows = [];
         alienCurrentMovementIndex = alienRows - 1;
+
+        enemyProjectileList = [];
+        UFOList = [];
 
         alienMovementFPS = 0;
         alienAcceleratedFPS = alienDefaultFPSForMovement;
@@ -1308,6 +1315,7 @@
         //Add player
         playerPosX = playerInitialPosX;
         playerPosY = playerInitialPosY;
+        playerProjectileList = [];
 
         //Add shields
         shieldList = [];
