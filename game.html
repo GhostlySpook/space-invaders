@@ -52,6 +52,27 @@
     var audioAlienExplode = new Audio();
     audioAlienExplode.src = "sounds/InvaderHit.mp3";
 
+    var audioDefenderShoot = new Audio();
+    audioDefenderShoot.src = "sounds/DefenderShoot.mp3";
+
+    var audioUFO1 = new Audio();
+    audioUFO1.src = "sounds/UFO1.mp3";
+
+    var audioUFO2 = new Audio();
+    audioUFO2.src = "sounds/UFO2.mp3";
+
+    var audioInvader1 = new Audio();
+    audioInvader1.src = "sounds/Invader1.mp3";
+
+    var audioInvader2 = new Audio();
+    audioInvader2.src = "sounds/Invader2.mp3";
+
+    var audioInvader3 = new Audio();
+    audioInvader3.src = "sounds/Invader3.mp3";
+
+    var audioInvader4 = new Audio();
+    audioInvader4.src = "sounds/Invader4.mp3";
+
     //////////////////////////////////
     //Game parameters
     //var gameStarted = 0;
@@ -105,6 +126,8 @@
 
     var alienPoints = 10;
     var alienFrozenTime = playerProjectileReloadTime;
+
+    var alienAudioOrder = [audioInvader1, audioInvader2, audioInvader3, audioInvader4];
 
     //Enemy projectile settings
     var enemyProjectileYLimit = 545;
@@ -473,9 +496,11 @@
             if(direction == UFODirections.RIGHT){
                 //Spawn on the left side
                 posX = UFOXLeftLimit;
+                audioUFO1.play();
             }
             else{
                 posX = UFOXRightLimit;
+                audioUFO2.play();
             }
 
             let newUFO = {
@@ -707,6 +732,7 @@
 
                     alienCurrentFrozenTime = alienFrozenTime;
 
+                    audioAlienExplode.currentTime = 0;
                     audioAlienExplode.play();
 
                     /*console.log("Post-shot:");
@@ -1023,6 +1049,9 @@
                 //console.log("New projectile:", projectile);
 
                 playerProjectileList.push(projectile);
+
+                audioDefenderShoot.currentTime = 0;
+                audioDefenderShoot.play();
             }
             shotInputReleased = false;
         }
