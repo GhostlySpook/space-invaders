@@ -1,22 +1,29 @@
 <head>
     <title>Moon Invaders</title>
-    <link rel = "icon" href=images/Small1.png type = "image/x-icon">
+    <link rel = "icon" href=invaders/images/Small1.png type = "image/x-icon">
 </head>
 <style>
-    #startButton {
+    p{
+        color:white;
+        font-size: 20px;
+        text-align: center;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    button {
         transition-duration: 0.4s;
         background-color: white;
         font-size: large;
         padding: 1%;
     }
 
-    #startButton:hover {
+    button:hover {
         background-color: black; /* Green */
         color: white;
         box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
     }
 </style>
-<body style="background-image: url('images/Earth.jpg'); 
+<body style="background-image: url('invaders/images/Earth.jpg'); 
 background-repeat: no-repeat; 
 background-size: cover;">
     <p style="color: white; text-align: center;
@@ -30,12 +37,18 @@ background-size: cover;">
     border: 3px solid black; 
     display: block; 
     margin-top: 2%; 
-    background-image: url('images/Moon.jpg');"></canvas>
+    background-image: url('invaders/images/Moon.jpg');"></canvas>
     <br>
+    <p>Arrows: Move / A: Shoot</p>
+    <button id="secretButton"
+    style="margin: auto; 
+    display: none; 
+    margin-top: 1%;" href="secret.html" onclick="window.open('secret.html','_blank')">Secret button</button>
     <button id="startButton" onClick="restartGame()" 
     style="margin: auto; 
     display: block; 
     margin-top: 1%;">Restart Game</button>
+    <br>
 </body>
 <!--canvas id = "debuggingCanvas" width="800" height="600"></canvas-->
 <script>
@@ -49,90 +62,90 @@ background-size: cover;">
     /*imgAlien.src = "images/Invader.png";*/
 
     var imgInvader1 = new Image();
-    imgInvader1.src = "images/Invader1.png";
+    imgInvader1.src = "invaders/images/Invader1.png";
 
     var imgInvader2 = new Image();
-    imgInvader2.src = "images/Invader2.png";
+    imgInvader2.src = "invaders/images/Invader2.png";
     
     var imgSmall1 = new Image();
-    imgSmall1.src = "images/Small1.png";
+    imgSmall1.src = "invaders/images/Small1.png";
 
     var imgSmall2 = new Image();
-    imgSmall2.src = "images/Small2.png";
+    imgSmall2.src = "invaders/images/Small2.png";
 
     var imgMedium1 = new Image();
-    imgMedium1.src = "images/Medium1.png";
+    imgMedium1.src = "invaders/images/Medium1.png";
 
     var imgMedium2 = new Image();
-    imgMedium2.src = "images/Medium2.png";
+    imgMedium2.src = "invaders/images/Medium2.png";
 
     var imgBig1 = new Image();
-    imgBig1.src = "images/Big1.png";
+    imgBig1.src = "invaders/images/Big1.png";
 
     var imgBig2 = new Image();
-    imgBig2.src = "images/Big2.png";
+    imgBig2.src = "invaders/images/Big2.png";
 
     var imgDefender = new Image();
     //imgDefender.src = "https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/e4af22756166f44.png";
-    imgDefender.src = "images/Defender.png";
+    imgDefender.src = "invaders/images/Defender.png";
 
     var imgDefenderExplode1 = new Image();
-    imgDefenderExplode1.src = "images/DefenderExplode1.png";
+    imgDefenderExplode1.src = "invaders/images/DefenderExplode1.png";
 
     var imgDefenderExplode2 = new Image();
-    imgDefenderExplode2.src = "images/DefenderExplode2.png";
+    imgDefenderExplode2.src = "invaders/images/DefenderExplode2.png";
 
     var imgProjectile = new Image();
-    imgProjectile.src = "images/Bullet.png";
+    imgProjectile.src = "invaders/images/Bullet.png";
 
     var imgEnemyProjectile = new Image();
-    imgEnemyProjectile.src = "images/EnemyProjectile.png";
+    imgEnemyProjectile.src = "invaders/images/EnemyProjectile.png";
 
     var imgUFO = new Image();
-    imgUFO.src = "images/UFO.png";
+    imgUFO.src = "invaders/images/UFO.png";
 
     var imgShield = new Image();
-    imgShield.src = "images/Shield.png";
+    imgShield.src = "invaders/images/Shield.png";
 
     var imgExplosion = new Image();
-    imgExplosion.src = "images/Explosion.png";
+    imgExplosion.src = "invaders/images/Explosion.png";
 
     var imgAlienExplosion = new Image();
-    imgAlienExplosion.src = "images/EnemyExplosion.png";
+    imgAlienExplosion.src = "invaders/images/EnemyExplosion.png";
 
     var imgAlienProjectileExplosion = new Image();
-    imgAlienProjectileExplosion.src = "images/AlienProjectileExplosion.png";
+    imgAlienProjectileExplosion.src = "invaders/images/AlienProjectileExplosion.png";
 
     //Load sounds!
     var audioAlienExplode = new Audio();
-    audioAlienExplode.src = "sounds/InvaderHit.mp3";
+    audioAlienExplode.src = "invaders/sounds/InvaderHit.mp3";
 
     var audioDefenderShoot = new Audio();
-    audioDefenderShoot.src = "sounds/DefenderShoot.mp3";
+    audioDefenderShoot.src = "invaders/sounds/DefenderShoot.mp3";
 
     var audioDefenderDowned = new Audio();
-    audioDefenderDowned.src = "sounds/DefenderDowned.mp3";
+    audioDefenderDowned.src = "invaders/sounds/DefenderDowned.mp3";
 
     var audioUFO1 = new Audio();
-    audioUFO1.src = "sounds/UFO1.mp3";
+    audioUFO1.src = "invaders/sounds/UFO1.mp3";
 
     var audioUFO2 = new Audio();
-    audioUFO2.src = "sounds/UFO2.mp3";
+    audioUFO2.src = "invaders/sounds/UFO2.mp3";
 
     var audioInvader1 = new Audio();
-    audioInvader1.src = "sounds/Invader1.mp3";
+    audioInvader1.src = "invaders/sounds/Invader1.mp3";
 
     var audioInvader2 = new Audio();
-    audioInvader2.src = "sounds/Invader2.mp3";
+    audioInvader2.src = "invaders/sounds/Invader2.mp3";
 
     var audioInvader3 = new Audio();
-    audioInvader3.src = "sounds/Invader3.mp3";
+    audioInvader3.src = "invaders/sounds/Invader3.mp3";
 
     var audioInvader4 = new Audio();
-    audioInvader4.src = "sounds/Invader4.mp3";
+    audioInvader4.src = "invaders/sounds/Invader4.mp3";
 
     var audio1Up = new Audio();
-    audio1Up.src = "sounds/1Up.mp3";
+    audio1Up.src = "invaders/sounds/1Up.mp3";
 
     //////////////////////////////////
     //Game parameters
@@ -147,6 +160,11 @@ background-size: cover;">
     var scoreForLife = 1500;
 
     var milisecondsBeforeNewRound = 5000;
+
+    const Directions = {
+        RIGHT: 0,
+        LEFT: 1
+    }
     
     //Player settings
     var playerSpeed = 4;
@@ -194,6 +212,7 @@ background-size: cover;">
     var alienBigScore = 10;
 
     var alienDirection = 1;
+    var alienChangeTo = Directions.LEFT;
     var alienDefaultXMoveDistance = 7;
     var alienYMoveDistance = 20;
     var alienDefaultFPSForMovement = 12;
@@ -232,10 +251,6 @@ background-size: cover;">
     var UFOXLeftLimit = 0; //Disappear once the left part touches the edge
     var UFOXRightLimit = screenWidth; //UFO should disappear once the right part touches the limit
     var UFOYSpawn = 60;
-    const UFODirections = {
-        RIGHT: 0,
-        LEFT: 1
-    }
 
     //Shield settings
     var defaultShields = 4;
@@ -483,7 +498,12 @@ background-size: cover;">
                 //If it is time to make the aliens change directions, do and move
                 if(alienReadyChangeDirection){
                     if((alienMovementRows.length - 1) == alienCurrentMovementIndex){
-                        alienDirection *= -1;
+                        if(alienChangeTo == Directions.RIGHT){
+                            alienDirection = 1;
+                        }
+                        else if(alienChangeTo == Directions.LEFT){
+                            alienDirection = -1;
+                        }
                     }
 
                     for(let alienNo = 0; alienNo < listLength; alienNo++){
@@ -502,8 +522,13 @@ background-size: cover;">
                             }
                         }
 
-                        if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
+                        if(alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight){
                             alienFlagDirection = true;
+                            alienChangeTo = Directions.LEFT;
+                        }
+                        else if(alienList[alienNo].posX < alienXLimitLeft){
+                            alienFlagDirection = true;
+                            alienChangeTo = Directions.RIGHT;
                         }
 
                         if(alienCurrentMovementIndex == 0){
@@ -528,8 +553,13 @@ background-size: cover;">
                             }
                         }
 
-                        if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
+                        if(alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight){
                             alienFlagDirection = true;
+                            alienChangeTo = Directions.LEFT;
+                        }
+                        else if(alienList[alienNo].posX < alienXLimitLeft){
+                            alienFlagDirection = true;
+                            alienChangeTo = Directions.RIGHT;
                         }
                     }
                 }
@@ -596,7 +626,7 @@ background-size: cover;">
             let direction = Math.floor(Math.random() * 2);
 
             //If the direction is to go right
-            if(direction == UFODirections.RIGHT){
+            if(direction == Directions.RIGHT){
                 //Spawn on the left side
                 posX = UFOXLeftLimit;
             }
@@ -626,7 +656,7 @@ background-size: cover;">
             let currentUFO = UFOList[i];
 
             //When the UFO is going right
-            if(currentUFO.direction == UFODirections.RIGHT){
+            if(currentUFO.direction == Directions.RIGHT){
                 //Do the movement
                 currentUFO.posX += UFOSpeed;
             
@@ -1295,13 +1325,13 @@ background-size: cover;">
             alienAcceleratedFPS *= alienReduceFPSWaitPercentage - Math.round(startingAliens / totalAliens) * 0.04;
             
             //Change how far aliens can go
-            alienCurrentXMoveDistance++;
+            alienCurrentXMoveDistance += 0.7;
         }
 
         if(totalAliens < alienColumns){
             //alienAcceleratedFPS *= alienReduceFPSWaitPercentage - (alienColumns / totalAliens) * 0.1;
             alienAcceleratedFPS = (totalAliens/alienColumns) * 1;
-            alienCurrentXMoveDistance += 1.5;
+            //alienCurrentXMoveDistance += 0.2;
         }
         else{
             alienAcceleratedFPS *= alienReduceFPSWaitPercentage;
@@ -1344,11 +1374,16 @@ background-size: cover;">
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
 
-        //Draw score
+        //Draw game over
         ctx.font = "30px Arial";
         ctx.fillStyle = "#ffffff";
         txtScore = "Game over";
         ctx.fillText(txtScore, 300, 100);
+
+        if(score >= defaultHighscore){
+            let button = document.getElementById("secretButton");
+            button.style.display = "block";
+        }
 
         alienYStart = alienDefaultYStart;
     }
