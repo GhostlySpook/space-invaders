@@ -2,7 +2,7 @@
     <title>Moon Invaders</title>
 </head>
 <body style="background-image: url('images/Earth.jpg'); background-repeat: no-repeat; background-size: cover;">
-    <canvas id="gameCanvas" width="800" height="600" style="margin: auto; border: 3px solid green; display: block; margin-top: 5%; background-color: black;"></canvas>
+    <canvas id="gameCanvas" width="800" height="600" style="margin: auto; border: 3px solid green; display: block; margin-top: 5%; background-image: url('images/Moon.jpg');"></canvas>
     <br>
     <button id="startButton" onClick="restartGame()" style="margin: auto; border: 3px solid green; display: block; margin-top: 1%;">Restart Game</button>
 </body>
@@ -1023,8 +1023,9 @@
     }
 
     var drawItems = () => {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+        ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+        //ctx.fillStyle = "black";
+        //ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
         
         //Draw score
         ctx.font = "30px Arial";
