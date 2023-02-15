@@ -1088,120 +1088,15 @@
             clearInterval(gameInterval);
         }
 
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keyup', handleKeyUp);
-        //gameStarted = 1;
-
         //Prepare score
         score = 0;
 
         //Prepare lives
         lives = defaultLives;
 
-        //Add aliens to game
-        alienCurrentFrozenTime = 0;
-        alienList = [];
-        bottomAliens = [];
-        alienMovementRows = [];
-        alienCurrentMovementIndex = alienRows - 1;
-        var alienFlagDirection = false;
-        let initialX = 400 - ((alienColumns * alienWidth + alienXSeparation * (alienColumns - 1)) / 2);        
-        let initialY = alienYStart;
-        let currentY = initialY;
-
-        //Create alien rows
-        for(let row = 0; row < alienRows; row++){
-            alienMovementRows.push(row);
-
-            let currentX = initialX;
-
-            for(let column = 0; column < alienColumns; column++){
-                //Make the pixel collision rectangular
-                let totalPixels = alienWidth * alienHeight;
-                let collisionData = [];
-                for(let i = 0; i < totalPixels; i++){
-                    collisionData.push(1);
-                }
-
-                let newPixelCollision = {
-                    data: collisionData,
-                    width: alienWidth,
-                    height: alienHeight
-                }
-
-                let alien = {
-                    row: row,
-                    column: column,
-                    posX: currentX,
-                    posY: currentY,
-                    width: alienWidth,
-                    height: alienHeight,
-                    pixelCollision: newPixelCollision,
-                    image: imgInvader1
-                };
-
-                alienList.push(alien);
-
-                currentX += alienXSeparation + alienWidth;
-
-                if(row == alienRows - 1){
-                    bottomAliens.push(alien);
-                    //console.log("Bottom Aliens:", bottomAliens);
-                }
-            }
-
-            currentY += alienYSeparation + alienHeight;
-        }
-
-        //Add player
-        playerPosX = playerInitialPosX;
-        playerPosY = playerInitialPosY;
-
-        //Add shields
-        shieldList = [];
-        let currentX = 0;
-        let halfShieldSeparation = (800 - defaultShields * defaultShieldWidth) / (defaultShields + 1);
-        for(let shieldNo = 0; shieldNo < defaultShields; shieldNo++){
-            currentX += halfShieldSeparation;
-
-            //Create a destructible object for the shield
-            let newPixelCollision = {
-                data: defaultDestructibleObject.data.slice(),
-                width: defaultDestructibleObject.width,
-                height: defaultDestructibleObject.height
-            };
-
-            //Give each image object their own
-            conversionCanvas.width = defaultShieldWidth;
-            conversionCanvas.height = defaultShieldHeight;
-            conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
-            conversionCtx.drawImage(imgShield, 0, 0, defaultShieldWidth, defaultShieldHeight);
-            
-            //let shieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);
-            let shieldImage = new Image();
-            shieldImage.src = conversionCanvas.toDataURL();
-
-            let shield = {
-                width: defaultShieldWidth,
-                height: defaultShieldHeight,
-                posX: currentX,
-                posY: defaultShieldPosY,
-                health: defaultShieldHealth,
-                pixelCollision: newPixelCollision,
-                image: shieldImage
-            };
-
-            currentX += defaultShieldWidth;
-
-            shieldList.push(shield);
-        }
-
-        tempSpriteList = [];
-
         gameInterval = setInterval(gameLoop, timeFraction);
 
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
+        createRound();
     }
 
     var handleKeyDown = () =>{
@@ -1332,10 +1227,10 @@
             alienYStart = alienDefaultYStart;
         }
 
-        setTimeout(startRound, milisecondsBeforeNewRound);
+        setTimeout(createRound, milisecondsBeforeNewRound);
     }
 
-    var startRound = () => {
+    var createRound = () => {
         if(gameInterval != null){
             clearInterval(gameInterval);
         }
