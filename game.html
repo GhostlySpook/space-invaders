@@ -55,6 +55,9 @@
     var audioDefenderShoot = new Audio();
     audioDefenderShoot.src = "sounds/DefenderShoot.mp3";
 
+    var audioDefenderDowned = new Audio();
+    audioDefenderDowned.src = "sounds/DefenderDowned.mp3";
+
     var audioUFO1 = new Audio();
     audioUFO1.src = "sounds/UFO1.mp3";
 
@@ -83,6 +86,8 @@
 
     var defaultLives = 3;
     var defaultHighscore = 1000;
+
+    var milisecondsBeforeNewRound = 5000;
     
     //Player settings
     var playerSpeed = 4;
@@ -112,7 +117,7 @@
     var alienWidth = 45;
     var alienDirection = 1;
     var alienXMoveDistance = 7;
-    var alienYMoveDistance = 10;
+    var alienYMoveDistance = 20;
     var alienDefaultFPSForMovement = 12;
     var alienDefaultFPSForProjectile = 120;
 
@@ -121,8 +126,8 @@
     var alienXLimitLeft = 50;
     var alienXLimitRight = 750;
     var alienXSeparation = 10;
-    var alienYSeparation = 15;
-    var alienYStart = 100;
+    var alienYSeparation = 20;
+    var alienDefaultYStart = 100;
 
     var alienPoints = 10;
     var alienFrozenTime = playerProjectileReloadTime;
@@ -343,7 +348,7 @@
 
     var alienList = [];
     var alienX = 0;
-    var alienY = alienYStart;
+    var alienYStart = alienDefaultYStart;
     var alienMovementFPS = 0;
     var alienAcceleratedFPS = alienDefaultFPSForMovement;
     var alienFlagDirection = false;
@@ -482,7 +487,16 @@
                     playerPosX, playerWidth, 
                     playerPosY, playerHeight)){
                 
-                loseLife();
+                loseLife(lives);
+            }
+        }
+
+        //Check aliens haven't reached the limit
+        for(let i = 0; i < bottomAliens.length; i++){
+            let currentAlien = bottomAliens[i];
+
+            if(currentAlien.posY + currentAlien.height >= playerPosY){
+                loseLife(lives);
             }
         }
 
@@ -496,11 +510,9 @@
             if(direction == UFODirections.RIGHT){
                 //Spawn on the left side
                 posX = UFOXLeftLimit;
-                audioUFO1.play();
             }
             else{
                 posX = UFOXRightLimit;
-                audioUFO2.play();
             }
 
             let newUFO = {
@@ -512,6 +524,7 @@
             }
 
             UFOList.push(newUFO);
+            audioUFO1.play();
 
             UFOCountSpawnFPS = 0;
         }
@@ -735,6 +748,10 @@
                     audioAlienExplode.currentTime = 0;
                     audioAlienExplode.play();
 
+                    if(alienList.length <= 0){
+                        winRound();
+                    }
+
                     /*console.log("Post-shot:");
                     console.log("Alien list: ", alienList);
                     console.log("Moving rows: ", alienMovementRows);*/
@@ -764,6 +781,8 @@
                         
                         //Remove UFO
                         UFOList.splice(UFONo, 1);
+
+                        audioUFO2.play();
 
                         removeProjectile = true;
 
@@ -880,7 +899,7 @@
             currentProjectile.posY, currentProjectile.height,
             playerPosX, playerWidth, playerPosY, playerHeight)){
                 //TODO Activate game over check and all that
-                loseLife();
+                loseLife(1);
                 removeProjectile = true;
             }
 
@@ -1080,6 +1099,7 @@
         //Add aliens to game
         alienCurrentFrozenTime = 0;
         alienList = [];
+        bottomAliens = [];
         alienMovementRows = [];
         alienCurrentMovementIndex = alienRows - 1;
         var alienFlagDirection = false;
@@ -1254,14 +1274,15 @@
         }
     }
 
-    var loseLife = () => {
-        lives--;
+    var loseLife = (lostLives) => {
+        lives -= lostLives;
 
         clearInterval(gameInterval);
         playerCurrentImage = imgDefenderExplode1;
         drawItems();
 
         downedCurrentLoop = 0;
+        audioDefenderDowned.play();
         gameInterval = setInterval(downedLoop, downedAnimationDelay);
 
         /*if(lives <= 0){
@@ -1282,6 +1303,27 @@
         ctx.fillStyle = "#ffffff";
         txtScore = "Game over";
         ctx.fillText(txtScore, 300, 100);
+
+        alienYStart = alienDefaultYStart;
+    }
+
+    var winRound = () => {
+        clearInterval(gameInterval);
+
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
+
+        //Every new cycle lower the starting point of the aliens
+        alienYStart += alienHeight + alienYSeparation;
+
+        //If the lower y of the aliens reaches the shield, then return it to the top!
+        let lowerY = alienYStart + alienRows * alienHeight + (alienRows - 1) * alienYSeparation;
+
+        if(lowerY >= defaultShieldPosY){
+            alienYStart = alienDefaultYStart;
+        }
+
+        setTimeout(restartGame, milisecondsBeforeNewRound);
     }
 
     var checkCollision = (x1, width1, y1, height1, x2, width2, y2, height2) => {
