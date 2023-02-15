@@ -76,6 +76,9 @@
     var audioInvader4 = new Audio();
     audioInvader4.src = "sounds/Invader4.mp3";
 
+    var audio1Up = new Audio();
+    audio1Up.src = "sounds/1Up.mp3";
+
     //////////////////////////////////
     //Game parameters
     //var gameStarted = 0;
@@ -221,7 +224,7 @@
             }
         }
 
-        console.log("Test", defaultDestructibleObject);
+        //console.log("Test", defaultDestructibleObject);
     }
 
     imgProjectile.onload = () => {        
@@ -1142,6 +1145,8 @@
 
         //Extra life calculation
         if(accumulatedScore >= scoreForLife){
+            audio1Up.play();
+
             newScore = accumulatedScore % scoreForLife;
             lives += Math.round((accumulatedScore - newScore) / scoreForLife);
             accumulatedScore = newScore;
