@@ -647,7 +647,8 @@ background-size: cover;">
         }
 
         //Create enemy projectiles
-        if(alienDefaultFPSForProjectile <= alienProjectileFPS && alienList.length > 0 && alienCurrentFrozenTime <= 0){
+        //Frequency changed according to shoot double as fast once the accelerated FPS is closer to the default FPS for moving
+        if((alienDefaultFPSForProjectile + alienDefaultFPSForProjectile * alienAcceleratedFPS / alienDefaultFPSForMovement) / 2 <= alienProjectileFPS && alienList.length > 0 && alienCurrentFrozenTime <= 0){
             listLength = alienList.length;
 
             //Select a random alien from the bottom and shoot
