@@ -3,7 +3,6 @@
     <link rel = "icon" href=images/Small1.png type = "image/x-icon">
 </head>
 <style>
-
     #startButton {
         transition-duration: 0.4s;
         background-color: white;
@@ -407,6 +406,7 @@ background-size: cover;">
     }
 
     //Start loop
+    var showMessage = false;
     var gameInterval;
 
     var score = 0;
@@ -1132,6 +1132,10 @@ background-size: cover;">
             ctx.drawImage(imgDefender, (35*i), 575, 30, 15)
         }
 
+        if(showMessage){
+            ctx.fillText("Good job, dear friend", 600, 590);
+        }
+
         //Draw temp text
         for(let i = 0; i < tempTextList.length; i++){
             let currentText = tempTextList[i];
@@ -1191,6 +1195,7 @@ background-size: cover;">
 
     var restartGame = () => {
         //console.log("Restarted");
+        showMessage = false;
         
         if(gameInterval != null){
             clearInterval(gameInterval);
@@ -1246,6 +1251,7 @@ background-size: cover;">
 
         if(score > highScore){
             highScore = score;
+            showMessage = true;
         }
 
         //Extra life calculation
