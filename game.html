@@ -181,17 +181,21 @@ background-size: cover;">
 
     var alienHeight = 22;
     var alienWidth = 45;
+
     var alienSmallHeight = 22;
     var alienSmallWidth = 30;
     var alienSmallScore = 30;
+
     var alienMediumHeight = 22;
     var alienMediumWidth = 40;
     var alienMediumScore = 20;
+
     var alienBigHeight = 22;
     var alienBigWidth = 45;
     var alienBigScore = 10;
+
     var alienDirection = 1;
-    var alienXMoveDistance = 7;
+    var alienDefaultXMoveDistance = 7;
     var alienYMoveDistance = 20;
     var alienDefaultFPSForMovement = 12;
     var alienDefaultFPSForProjectile = 120;
@@ -432,6 +436,7 @@ background-size: cover;">
     var alienFlagDirection = false;
     var alienReadyChangeDirection = false;
     var alienMovementRows = [];
+    var alienCurrentXMoveDistance = alienDefaultXMoveDistance;
     var alienCurrentMovementIndex = 0;
 
     var alienCurrentAudioIndex = 0;
@@ -486,7 +491,7 @@ background-size: cover;">
 
                         //If it is the turn of the row of aliens to move, move
                         if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
-                            alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                            alienList[alienNo].posX += alienDirection * alienCurrentXMoveDistance;
                             alienList[alienNo].posY += alienYMoveDistance;
 
                             if(currentAlien.image == currentAlien.image1){
@@ -513,7 +518,7 @@ background-size: cover;">
                         let currentAlien = alienList[alienNo];
 
                         if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
-                            alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+                            alienList[alienNo].posX += alienDirection * alienCurrentXMoveDistance;
 
                             if(currentAlien.image == currentAlien.image1){
                                 currentAlien.image = currentAlien.image2;
@@ -1282,11 +1287,15 @@ background-size: cover;">
 
         if(totalAliens % alienRows == 0){
             alienAcceleratedFPS *= alienReduceFPSWaitPercentage - Math.round(startingAliens / totalAliens) * 0.04;
+            
+            //Change how far aliens can go
+            alienCurrentXMoveDistance++;
         }
 
         if(totalAliens < alienColumns){
             //alienAcceleratedFPS *= alienReduceFPSWaitPercentage - (alienColumns / totalAliens) * 0.1;
             alienAcceleratedFPS = (totalAliens/alienColumns) * 1;
+            alienCurrentXMoveDistance += 1.5;
         }
         else{
             alienAcceleratedFPS *= alienReduceFPSWaitPercentage;
@@ -1382,6 +1391,7 @@ background-size: cover;">
         UFOList = [];
 
         alienMovementFPS = 0;
+        alienCurrentXMoveDistance = alienDefaultXMoveDistance;
         alienAcceleratedFPS = alienDefaultFPSForMovement;
         alienReadyChangeDirection = false;
         alienDirection = 1;
