@@ -150,10 +150,10 @@
     var alienHeight = 22;
     var alienWidth = 45;
     var alienSmallHeight = 22;
-    var alienSmallWidth = 45;
+    var alienSmallWidth = 30;
     var alienSmallScore = 30;
     var alienMediumHeight = 22;
-    var alienMediumWidth = 45;
+    var alienMediumWidth = 40;
     var alienMediumScore = 20;
     var alienBigHeight = 22;
     var alienBigWidth = 45;
@@ -1343,7 +1343,8 @@
                     break;
             }
 
-            let currentX = initialX;
+            //Add the small difference if there is from the left side
+            let currentX = initialX + (alienWidth - currentWidth) / 2;
 
             for(let column = 0; column < alienColumns; column++){
 
