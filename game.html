@@ -2,6 +2,21 @@
     <title>Moon Invaders</title>
     <link rel = "icon" href=images/Small1.png type = "image/x-icon">
 </head>
+<style>
+
+    #startButton {
+        transition-duration: 0.4s;
+        background-color: white;
+        font-size: large;
+        padding: 1%;
+    }
+
+    #startButton:hover {
+        background-color: black; /* Green */
+        color: white;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+</style>
 <body style="background-image: url('images/Earth.jpg'); 
 background-repeat: no-repeat; 
 background-size: cover;">
@@ -18,7 +33,10 @@ background-size: cover;">
     margin-top: 2%; 
     background-image: url('images/Moon.jpg');"></canvas>
     <br>
-    <button id="startButton" onClick="restartGame()" style="margin: auto; border: 3px solid green; display: block; margin-top: 1%;">Restart Game</button>
+    <button id="startButton" onClick="restartGame()" 
+    style="margin: auto; 
+    display: block; 
+    margin-top: 1%;">Restart Game</button>
 </body>
 <!--canvas id = "debuggingCanvas" width="800" height="600"></canvas-->
 <script>
