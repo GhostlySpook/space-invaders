@@ -402,6 +402,9 @@
     var alienMovementRows = [];
     var alienCurrentMovementIndex = 0;
 
+    var alienCurrentAudioIndex = 0;
+    var alienCurrentAudioFrame = 0;
+
     var alienCurrentFrozenTime = 0;
     var bottomAliens = [];
 
@@ -418,6 +421,8 @@
     var gameLoop = () => {
         //Drawing function to draw everything
         drawItems();
+
+        alienPlayAudio();
 
         handleInput();
 
@@ -962,9 +967,7 @@
                 projectileNo--;
             }
         }
-
-        
-        
+      
         //Pass time for temporal sprites
         for(let spriteNo = 0; spriteNo < tempSpriteList.length; spriteNo++){
             
@@ -1194,6 +1197,28 @@
         }
     }
 
+    var alienPlayAudio = () => {
+        let neededFrames = alienAcceleratedFPS * alienMovementRows.length;
+        if(neededFrames < 1){
+            neededFrames = alienMovementRows.length;
+        }
+
+        if(alienCurrentAudioFrame >= neededFrames){
+            alienCurrentAudioFrame = 0;
+
+            alienAudioOrder[alienCurrentAudioIndex].play();
+            
+            alienCurrentAudioIndex++;
+
+            if(alienCurrentAudioIndex >= alienAudioOrder.length){
+                alienCurrentAudioIndex = 0;
+            }
+        }
+        else{
+            alienCurrentAudioFrame++;
+        }
+    }
+
     //This is used after the alien is destroyed
     var speedAliensUp = () => {
         let startingAliens = alienRows * alienColumns;
@@ -1291,6 +1316,7 @@
 
         //Add aliens to game
         alienCurrentFrozenTime = 0;
+        alienCurrentAudioIndex = 0;
         alienList = [];
         bottomAliens = [];
         alienMovementRows = [];
