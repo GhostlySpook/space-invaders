@@ -417,6 +417,7 @@
     var shieldList = [];
 
     var tempSpriteList = [];
+    var tempTextList = [];
 
     var gameLoop = () => {
         //Drawing function to draw everything
@@ -828,7 +829,9 @@
                 currentUFO.posY, currentUFO.height)){
 
                         //Give random points after hitting!
-                        addScore(Math.floor(Math.random() * 6) * 50 + 50); //Score generated should be from 50 to 300
+                        let newPoints = Math.floor(Math.random() * 6) * 50 + 50;
+                        addScore(newPoints); //Score generated should be from 50 to 300
+                        addTempText(newPoints, 60, currentUFO.posX + 10, currentUFO.posY + 10);
                         
                         //Remove UFO
                         UFOList.splice(UFONo, 1);
@@ -968,7 +971,7 @@
             }
         }
       
-        //Pass time for temporal sprites
+        //Pass time for temporal drawn images
         for(let spriteNo = 0; spriteNo < tempSpriteList.length; spriteNo++){
             
             let currentSprite = tempSpriteList[spriteNo];
@@ -977,6 +980,18 @@
             if(currentSprite.frames <= 0){
                 tempSpriteList.splice(spriteNo, 1);
                 spriteNo--;
+            }
+        }
+
+        //Pass time for temporal drawn text
+        for(let textNo = 0; textNo < tempTextList.length; textNo++){
+            
+            let currentText = tempTextList[textNo];
+            currentText.frames--;
+
+            if(currentText.frames <= 0){
+                tempTextList.splice(textNo, 1);
+                textNo--;
             }
         }
     };
@@ -1072,11 +1087,18 @@
 
         //Draw lives
         ctx.font = "20px Arial";
-        ctx.fillText(lives, 10, 590);
+        ctx.fillText(lives, 10, 590);    
         let initialXDrawingPos = 50;
         for(let i = 1; i < lives; i++){
             ctx.drawImage(imgDefender, (35*i), 575, 30, 15)
         }
+
+        //Draw temp text
+        for(let i = 0; i < tempTextList.length; i++){
+            let currentText = tempTextList[i];
+            ctx.fillText(currentText.text, currentText.posX, currentText.posY);
+        }
+
         ctx.fillStyle = "#00FF00"
         ctx.fillRect(0, 565, 800, 3);
     }
@@ -1461,6 +1483,7 @@
         }
 
         tempSpriteList = [];
+        tempTextList = [];
 
         gameInterval = setInterval(gameLoop, timeFraction);
 
@@ -1636,5 +1659,16 @@
         };
 
         tempSpriteList.push(sprite);
+    }
+
+    var addTempText = (text, frames, posX, posY) => {
+        let newText = {
+            text: text,
+            frames: frames,
+            posX: posX,
+            posY: posY,
+        };
+
+        tempTextList.push(newText);
     }
 </script>
