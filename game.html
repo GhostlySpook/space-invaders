@@ -22,6 +22,24 @@
 
     var imgInvader2 = new Image();
     imgInvader2.src = "images/Invader2.png";
+    
+    var imgSmall1 = new Image();
+    imgSmall1.src = "images/Small1.png";
+
+    var imgSmall2 = new Image();
+    imgSmall2.src = "images/Small2.png";
+
+    var imgMedium1 = new Image();
+    imgMedium1.src = "images/Medium1.png";
+
+    var imgMedium2 = new Image();
+    imgMedium2.src = "images/Medium2.png";
+
+    var imgBig1 = new Image();
+    imgBig1.src = "images/Big1.png";
+
+    var imgBig2 = new Image();
+    imgBig2.src = "images/Big2.png";
 
     var imgDefender = new Image();
     //imgDefender.src = "https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/e4af22756166f44.png";
@@ -120,16 +138,30 @@
     var downedLoops = 18;
 
     //Alien settings
+    var ALIEN_SIZES = {
+        SMALL: 0,
+        MEDIUM: 1,
+        BIG: 2
+    }
+
     var alienRows = 5;
     var alienColumns = 11;
 
     var alienHeight = 22;
     var alienWidth = 45;
+    var alienSmallHeight = 22;
+    var alienSmallWidth = 45;
+    var alienMediumHeight = 22;
+    var alienMediumWidth = 45;
+    var alienBigHeight = 22;
+    var alienBigWidth = 45;
     var alienDirection = 1;
     var alienXMoveDistance = 7;
     var alienYMoveDistance = 20;
     var alienDefaultFPSForMovement = 12;
     var alienDefaultFPSForProjectile = 120;
+
+    var alienFormation = [ALIEN_SIZES.SMALL, ALIEN_SIZES.MEDIUM, ALIEN_SIZES.MEDIUM, ALIEN_SIZES.BIG, ALIEN_SIZES.BIG];
 
     var alienReduceFPSWaitPercentage = 0.97;
 
@@ -416,11 +448,11 @@
                             alienList[alienNo].posX += alienDirection * alienXMoveDistance;
                             alienList[alienNo].posY += alienYMoveDistance;
 
-                            if(currentAlien.image == imgInvader1){
-                                currentAlien.image = imgInvader2;
+                            if(currentAlien.image == currentAlien.image1){
+                                currentAlien.image = currentAlien.image2;
                             }
                             else{
-                                currentAlien.image = imgInvader1;
+                                currentAlien.image = currentAlien.image1;
                             }
                         }
 
@@ -442,11 +474,11 @@
                         if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
                             alienList[alienNo].posX += alienDirection * alienXMoveDistance;
 
-                            if(currentAlien.image == imgInvader1){
-                                currentAlien.image = imgInvader2;
+                            if(currentAlien.image == currentAlien.image1){
+                                currentAlien.image = currentAlien.image2;
                             }
                             else{
-                                currentAlien.image = imgInvader1;
+                                currentAlien.image = currentAlien.image1;
                             }
                         }
 
@@ -1278,11 +1310,38 @@
         for(let row = 0; row < alienRows; row++){
             alienMovementRows.push(row);
 
+            let currentWidth = alienWidth;
+            let currentHeight = alienHeight;
+            let currentImage1 = imgInvader1;
+            let currentImage2 = imgInvader2;
+
+            switch(alienFormation[row]){
+                case ALIEN_SIZES.BIG:
+                    currentWidth = alienBigWidth;
+                    currentHeight = alienBigHeight;
+                    currentImage1 = imgBig1;
+                    currentImage2 = imgBig2;
+                    break;
+                case ALIEN_SIZES.MEDIUM:
+                    currentWidth = alienMediumWidth;
+                    currentHeight = alienMediumHeight;
+                    currentImage1 = imgMedium1;
+                    currentImage2 = imgMedium2;
+                    break;
+                case ALIEN_SIZES.SMALL:
+                    currentWidth = alienSmallWidth;
+                    currentHeight = alienSmallHeight;
+                    currentImage1 = imgSmall1;
+                    currentImage2 = imgSmall2;
+                    break;
+            }
+
             let currentX = initialX;
 
             for(let column = 0; column < alienColumns; column++){
+
                 //Make the pixel collision rectangular
-                let totalPixels = alienWidth * alienHeight;
+                let totalPixels = currentWidth * currentHeight;
                 let collisionData = [];
                 for(let i = 0; i < totalPixels; i++){
                     collisionData.push(1);
@@ -1290,8 +1349,8 @@
 
                 let newPixelCollision = {
                     data: collisionData,
-                    width: alienWidth,
-                    height: alienHeight
+                    width: currentWidth,
+                    height: currentHeight
                 }
 
                 let alien = {
@@ -1299,11 +1358,15 @@
                     column: column,
                     posX: currentX,
                     posY: currentY,
-                    width: alienWidth,
-                    height: alienHeight,
+                    width: currentWidth,
+                    height: currentHeight,
                     pixelCollision: newPixelCollision,
-                    image: imgInvader1
+                    image1: currentImage1,
+                    image2: currentImage2,
+                    image: null
                 };
+
+                alien.image = alien.image1;
 
                 alienList.push(alien);
 
