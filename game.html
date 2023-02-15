@@ -151,10 +151,13 @@
     var alienWidth = 45;
     var alienSmallHeight = 22;
     var alienSmallWidth = 45;
+    var alienSmallScore = 30;
     var alienMediumHeight = 22;
     var alienMediumWidth = 45;
+    var alienMediumScore = 20;
     var alienBigHeight = 22;
     var alienBigWidth = 45;
+    var alienBigScore = 10;
     var alienDirection = 1;
     var alienXMoveDistance = 7;
     var alienYMoveDistance = 20;
@@ -504,7 +507,7 @@
             }
         }
 
-        //Collision with shields or player by bottom aliens
+        //Collision of aliens with shields or player by bottom aliens
         for(let i = 0; i < alienList.length; i++){
             let currentAlien = alienList[i];
 
@@ -734,7 +737,7 @@
                     console.log("Alien list: ", alienList);
                     console.log("Moving rows: ", alienMovementRows);*/
 
-                    addScore(alienPoints);
+                    addScore(currentAlien.points);
                     //console.log(alienAcceleratedFPS);
 
                     let currentPosX = currentAlien.posX;
@@ -1314,6 +1317,7 @@
             let currentHeight = alienHeight;
             let currentImage1 = imgInvader1;
             let currentImage2 = imgInvader2;
+            let currentPoints = alienPoints;
 
             switch(alienFormation[row]){
                 case ALIEN_SIZES.BIG:
@@ -1321,18 +1325,21 @@
                     currentHeight = alienBigHeight;
                     currentImage1 = imgBig1;
                     currentImage2 = imgBig2;
+                    currentPoints = alienBigScore;
                     break;
                 case ALIEN_SIZES.MEDIUM:
                     currentWidth = alienMediumWidth;
                     currentHeight = alienMediumHeight;
                     currentImage1 = imgMedium1;
                     currentImage2 = imgMedium2;
+                    currentPoints = alienMediumScore;
                     break;
                 case ALIEN_SIZES.SMALL:
                     currentWidth = alienSmallWidth;
                     currentHeight = alienSmallHeight;
                     currentImage1 = imgSmall1;
                     currentImage2 = imgSmall2;
+                    currentPoints = alienSmallScore;
                     break;
             }
 
@@ -1363,7 +1370,8 @@
                     pixelCollision: newPixelCollision,
                     image1: currentImage1,
                     image2: currentImage2,
-                    image: null
+                    image: null,
+                    points: currentPoints
                 };
 
                 alien.image = alien.image1;
