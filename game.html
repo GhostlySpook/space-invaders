@@ -1,6 +1,6 @@
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 <button id="startButton" onClick="restartGame()">Restart Game</button>
-<canvas id = "debuggingCanvas" width="800" height="600"></canvas>
+<!--canvas id = "debuggingCanvas" width="800" height="600"></canvas-->
 <script>
     //Define canvas
     var gameCanvas = document.getElementById("gameCanvas");
@@ -9,38 +9,48 @@
     //Load images
     var imgAlien = new Image();
     //imgAlien.src = "http://s3.amazonaws.com/gt7sp-prod/decal/76/67/97/4621335403474976776_1.png";
-    imgAlien.src = "Invader.png";
+    /*imgAlien.src = "images/Invader.png";*/
+
+    var imgInvader1 = new Image();
+    imgInvader1.src = "images/Invader1.png";
+
+    var imgInvader2 = new Image();
+    imgInvader2.src = "images/Invader2.png";
 
     var imgDefender = new Image();
     //imgDefender.src = "https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/e4af22756166f44.png";
-    imgDefender.src = "Defender.png";
+    imgDefender.src = "images/Defender.png";
 
     var imgDefenderExplode1 = new Image();
-    imgDefenderExplode1.src = "DefenderExplode1.png";
+    imgDefenderExplode1.src = "images/DefenderExplode1.png";
 
     var imgDefenderExplode2 = new Image();
-    imgDefenderExplode2.src = "DefenderExplode2.png";
+    imgDefenderExplode2.src = "images/DefenderExplode2.png";
 
     var imgProjectile = new Image();
-    imgProjectile.src = "Bullet.png";
+    imgProjectile.src = "images/Bullet.png";
 
     var imgEnemyProjectile = new Image();
-    imgEnemyProjectile.src = "EnemyProjectile.png";
+    imgEnemyProjectile.src = "images/EnemyProjectile.png";
 
     var imgUFO = new Image();
-    imgUFO.src = "UFO.png";
+    imgUFO.src = "images/UFO.png";
 
     var imgShield = new Image();
-    imgShield.src = "Shield.png";
+    imgShield.src = "images/Shield.png";
 
     var imgExplosion = new Image();
-    imgExplosion.src = "Explosion.png";
+    imgExplosion.src = "images/Explosion.png";
 
     var imgAlienExplosion = new Image();
-    imgAlienExplosion.src = "EnemyExplosion.png";
+    imgAlienExplosion.src = "images/EnemyExplosion.png";
 
     var imgAlienProjectileExplosion = new Image();
-    imgAlienProjectileExplosion.src = "AlienProjectileExplosion.png";
+    imgAlienProjectileExplosion.src = "images/AlienProjectileExplosion.png";
+
+    //Load sounds!
+    var audioAlienExplode = new Audio();
+    audioAlienExplode.src = "sounds/InvaderHit.mp3";
 
     //////////////////////////////////
     //Game parameters
@@ -70,8 +80,8 @@
     var playerProjectileSpeed = 10;
     var playerProjectileYLimit = 50;
 
-    var downedAnimationDelay = 1000 / (5/*FPS*/);
-    var downedLoops = 12;
+    var downedAnimationDelay = 1000 / (10/*FPS*/);
+    var downedLoops = 18;
 
     //Alien settings
     var alienRows = 5;
@@ -147,9 +157,9 @@
     let conversionCanvas = document.createElement("canvas");
     let conversionCtx = conversionCanvas.getContext("2d");
 
-    let debuggingCanvas = document.getElementById("debuggingCanvas");
-    let debuggingCtx = debuggingCanvas.getContext("2d");
-    debuggingCanvas.style.background = "pink";
+    //let debuggingCanvas = document.getElementById("debuggingCanvas");
+    //let debuggingCtx = debuggingCanvas.getContext("2d");
+    //debuggingCanvas.style.background = "pink";
 
     var defaultDestructibleObject;
     var playerProjectileObject;
@@ -360,9 +370,19 @@
                     }
 
                     for(let alienNo = 0; alienNo < listLength; alienNo++){
+                        let currentAlien = alienList[alienNo];
+
+                        //If it is the turn of the row of aliens to move, move
                         if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
                             alienList[alienNo].posX += alienDirection * alienXMoveDistance;
                             alienList[alienNo].posY += alienYMoveDistance;
+
+                            if(currentAlien.image == imgInvader1){
+                                currentAlien.image = imgInvader2;
+                            }
+                            else{
+                                currentAlien.image = imgInvader1;
+                            }
                         }
 
                         if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
@@ -378,8 +398,17 @@
                 else{
                     //If not, move normally
                     for(let alienNo = 0; alienNo < listLength; alienNo++){
+                        let currentAlien = alienList[alienNo];
+
                         if(alienList[alienNo].row == alienMovementRows[alienCurrentMovementIndex]){
                             alienList[alienNo].posX += alienDirection * alienXMoveDistance;
+
+                            if(currentAlien.image == imgInvader1){
+                                currentAlien.image = imgInvader2;
+                            }
+                            else{
+                                currentAlien.image = imgInvader1;
+                            }
                         }
 
                         if((alienList[alienNo].posX + alienList[alienNo].width > alienXLimitRight || alienList[alienNo].posX < alienXLimitLeft)){
@@ -678,6 +707,8 @@
 
                     alienCurrentFrozenTime = alienFrozenTime;
 
+                    audioAlienExplode.play();
+
                     /*console.log("Post-shot:");
                     console.log("Alien list: ", alienList);
                     console.log("Moving rows: ", alienMovementRows);*/
@@ -901,7 +932,7 @@
             //console.log("Gone through alien no: ", alienNo);
             let currentAlien = alienList[alienNo];
             //console.log(currentAlien);
-            ctx.drawImage(imgAlien, currentAlien.posX, currentAlien.posY, currentAlien.width, currentAlien.height);
+            ctx.drawImage(currentAlien.image, currentAlien.posX, currentAlien.posY, currentAlien.width, currentAlien.height);
         }
 
         //Draw UFO
@@ -1054,7 +1085,8 @@
                     posY: currentY,
                     width: alienWidth,
                     height: alienHeight,
-                    pixelCollision: newPixelCollision
+                    pixelCollision: newPixelCollision,
+                    image: imgInvader1
                 };
 
                 alienList.push(alien);
@@ -1156,6 +1188,10 @@
 
         if(score > highScore){
             highScore = score;
+        }
+
+        if(score > defaultHighscore){
+            lives++;
         }
     }
 
