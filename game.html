@@ -453,6 +453,7 @@ background-size: cover;">
     var alienMovementRows = [];
     var alienCurrentXMoveDistance = alienDefaultXMoveDistance;
     var alienCurrentMovementIndex = 0;
+    var alienCurrentAudio = null;
 
     var alienCurrentAudioIndex = 0;
     var alienCurrentAudioFrame = 0;
@@ -1296,6 +1297,10 @@ background-size: cover;">
     }
 
     var alienPlayAudio = () => {
+        if(alienCurrentAudio == null){
+            alienCurrentAudio = alienAudioOrder[0];
+        }
+
         let neededFrames = alienAcceleratedFPS * alienMovementRows.length;
         if(neededFrames < 1){
             neededFrames = alienMovementRows.length;
@@ -1304,7 +1309,11 @@ background-size: cover;">
         if(alienCurrentAudioFrame >= neededFrames){
             alienCurrentAudioFrame = 0;
 
-            alienAudioOrder[alienCurrentAudioIndex].play();
+            alienCurrentAudio.pause()
+            alienCurrentAudio.currentTime = 0;
+
+            alienCurrentAudio = alienAudioOrder[alienCurrentAudioIndex]
+            alienCurrentAudio.play();
             
             alienCurrentAudioIndex++;
 
