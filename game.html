@@ -1225,6 +1225,9 @@ background-size: cover;">
     }
 
     var restartGame = () => {
+        if(event != null){
+            event.preventDefault();
+        }
         //console.log("Restarted");
         showMessage = false;
         
@@ -1245,6 +1248,10 @@ background-size: cover;">
     }
 
     var handleKeyDown = () =>{
+        if(event.keyCode == 32){
+            event.preventDefault();
+        }
+
         if((event.keyCode == 65 || event.keyCode == 37) && keyLeft == false) {
             keyLeft = true;
             //console.log('Left was pressed');
@@ -1253,6 +1260,8 @@ background-size: cover;">
             keyRight = true;
             //console.log('Right was pressed');
         }
+
+        //Spacebar
         else if((event.keyCode == 32) && keyShoot == false) {
             keyShoot = true;
             //console.log('A was pressed');
@@ -1260,6 +1269,10 @@ background-size: cover;">
     }
 
     var handleKeyUp = () => {
+        if(event.keyCode == 32){
+            event.preventDefault();
+        }
+
         if((event.keyCode == 65 || event.keyCode == 37) && keyLeft == true) {
             keyLeft = false;
             //console.log('Left was released');
