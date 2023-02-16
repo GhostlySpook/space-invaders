@@ -39,7 +39,7 @@ background-size: cover;">
     margin-top: 2%; 
     background-image: url('invaders/images/Moon.jpg');"></canvas>
     <br>
-    <p>Arrows: Move / A: Shoot</p>
+    <p>← / A: Left | → / D: Right | Spacebar: Shoot</p>
     <button id="secretButton"
     style="margin: auto; 
     display: none; 
@@ -1245,30 +1245,30 @@ background-size: cover;">
     }
 
     var handleKeyDown = () =>{
-        if(event.keyCode == 37 && keyLeft == false) {
+        if((event.keyCode == 65 || event.keyCode == 37) && keyLeft == false) {
             keyLeft = true;
             //console.log('Left was pressed');
         }
-        else if(event.keyCode == 39 && keyRight == false) {
+        else if((event.keyCode == 68 || event.keyCode == 39) && keyRight == false) {
             keyRight = true;
             //console.log('Right was pressed');
         }
-        else if(event.keyCode == 65 && keyShoot == false) {
+        else if((event.keyCode == 32) && keyShoot == false) {
             keyShoot = true;
             //console.log('A was pressed');
         }
     }
 
     var handleKeyUp = () => {
-        if(event.keyCode == 37 && keyLeft == true) {
+        if((event.keyCode == 65 || event.keyCode == 37) && keyLeft == true) {
             keyLeft = false;
             //console.log('Left was released');
         }
-        else if(event.keyCode == 39 && keyRight == true) {
+        else if((event.keyCode == 68 || event.keyCode == 39) && keyRight == true) {
             keyRight = false;
             //console.log('Right was released');
         }
-        else if(event.keyCode == 65 && keyShoot == true) {
+        else if((event.keyCode == 32) && keyShoot == true) {
             keyShoot = false;
             //console.log('A was pressed');
         }
