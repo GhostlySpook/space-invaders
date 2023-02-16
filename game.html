@@ -280,9 +280,9 @@ background-size: cover;">
     let conversionCanvas = document.createElement("canvas");
     let conversionCtx = conversionCanvas.getContext("2d");
 
-    //let debuggingCanvas = document.getElementById("debuggingCanvas");
-    //let debuggingCtx = debuggingCanvas.getContext("2d");
-    //debuggingCanvas.style.background = "pink";
+    /*let debuggingCanvas = document.getElementById("debuggingCanvas");
+    let debuggingCtx = debuggingCanvas.getContext("2d");
+    debuggingCanvas.style.background = "pink";*/
 
     var defaultDestructibleObject;
     var playerProjectileObject;
@@ -762,12 +762,12 @@ background-size: cover;">
 
                         //Deal damage to shield
                         let projectileCenterX = currentProjectile.posX + currentProjectile.width / 2;
-                        let explosionCenterX = projectileCenterX - playerProjectileExplosionObject.width / 2;
+                        let explosionX = projectileCenterX - playerProjectileExplosionObject.width / 2;
 
                         //console.log("playerProjectileExplosion: ", playerProjectileExplosionObject);
 
                         //Generate new image for the shield alongside dealing damage
-                        damageShield(currentShield, playerProjectileExplosionObject, explosionCenterX, currentProjectile.posY);
+                        damageShield(currentShield, playerProjectileExplosionObject, explosionX, currentProjectile.posY);
                         
                         /*conversionCanvas.width = defaultShieldWidth
                         conversionCanvas.height = defaultShieldHeight;
@@ -995,7 +995,7 @@ background-size: cover;">
                         let explosionX = projectileCenterX - enemyProjectileExplosionObject.width / 2;
 
                         //Generate new image for the shield alongside dealing damage
-                        damageShield(currentShield, enemyProjectileExplosionObject, explosionX, currentProjectile.posY);
+                        damageShield(currentShield, enemyProjectileExplosionObject, explosionX, currentProjectile.posY + (currentProjectile.height / 2));
                         
                         /*conversionCanvas.width = defaultShieldWidth
                         conversionCanvas.height = defaultShieldHeight;
@@ -1640,8 +1640,8 @@ background-size: cover;">
     var damageShield = (shield, shape, shapeX, shapeY) => {
         //A is shield
         //B is damage shape
-        //console.log("Shield object: ", shield);
-        //console.log("Explosion shape:", shape);
+        console.log("Shield object: ", shield);
+        console.log("Explosion shape:", shape);
 
         let listPixelsToChange = [];
 
@@ -1649,14 +1649,19 @@ background-size: cover;">
         let differenceX = shapeX - shield.posX;
         let differenceY = shapeY - shield.posY;
 
+        //debuggingCtx.fillStyle = "black";
+
         for(let aRow = 0; aRow < shield.width; aRow++){
+
             //Skip row B if row A is above the row B
             if(aRow < differenceY){
+                //debuggingCtx.rect(0, aRow, shield.width, 1);
                 continue;
             }
 
             //Skip row B if row A is under the row B
             if(aRow > shape.height - 1 + differenceY){
+                //debuggingCtx.rect(0, aRow, shield.width, 1);
                 continue;
             }
 
@@ -1664,17 +1669,20 @@ background-size: cover;">
 
                 //Skip col B if col A is left of the col B
                 if(aCol < differenceX){
+                    //debuggingCtx.rect(aCol, aRow, 1, 1);
                     continue;
                 }
 
                 //Skip col B if col A is right of the col B
                 if(aCol > shape.width - 1 + differenceX){
+                    //debuggingCtx.rect(aCol, aRow, 1, 1);
                     continue;
                 }
 
                 //Skip if there isn't anything to collide
                 let aPointer = aCol + shield.width * aRow;
                 if(shield.pixelCollision.data[aPointer] == 0){
+                    //debuggingCtx.rect(aCol, aRow, 1, 1);
                     continue;
                 }
 
@@ -1703,33 +1711,34 @@ background-size: cover;">
 
         //console.log("Remove spaces phase");
 
-        //Remove the empty spaces from the shield image
-        conversionCanvas.width = defaultShieldWidth
-        conversionCanvas.height = defaultShieldHeight;
-        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
-        conversionCtx.drawImage(shield.image, 0, 0, defaultShieldWidth, defaultShieldHeight);
+        //Remove the empty spaces from the shield image if there was damage
+        if(listPixelsToChange.length > 0){
+            conversionCanvas.width = defaultShieldWidth
+            conversionCanvas.height = defaultShieldHeight;
+            conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+            conversionCtx.drawImage(shield.image, 0, 0, defaultShieldWidth, defaultShieldHeight);
 
-        let tempShieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight)
+            let tempShieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight)
 
-        //Remove the empty spaces from the image using the list of collision obtained
-        for(let pointer = 0; pointer < listPixelsToChange.length; pointer++){
-            let pixelPosition = listPixelsToChange[pointer];
+            //Remove the empty spaces from the image using the list of collision obtained
+            for(let pointer = 0; pointer < listPixelsToChange.length; pointer++){
+                let pixelPosition = listPixelsToChange[pointer];
 
-            let imagePixelPosition = 4 * pixelPosition;
+                let imagePixelPosition = 4 * pixelPosition;
 
-            tempShieldImageData.data[imagePixelPosition] = 0;
-            tempShieldImageData.data[imagePixelPosition + 1] = 0;
-            tempShieldImageData.data[imagePixelPosition + 2] = 0;
-            tempShieldImageData.data[imagePixelPosition + 3] = 0;
+                tempShieldImageData.data[imagePixelPosition] = 0;
+                tempShieldImageData.data[imagePixelPosition + 1] = 0;
+                tempShieldImageData.data[imagePixelPosition + 2] = 0;
+                tempShieldImageData.data[imagePixelPosition + 3] = 0;
+            }
+
+            conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
+            conversionCtx.putImageData(tempShieldImageData, 0, 0);
+            
+            shield.image.src = conversionCanvas.toDataURL();
         }
 
-        conversionCtx.clearRect(0, 0, conversionCanvas.width, conversionCanvas.height);
-        //conversionCtx.putImageData(tempShieldImageData, 0, 0, defaultShieldWidth, defaultShieldHeight);
-        conversionCtx.putImageData(tempShieldImageData, 0, 0);
-        
-        //let shieldImageData = conversionCtx.getImageData(0, 0, defaultShieldWidth, defaultShieldHeight);
-        shield.image.src = conversionCanvas.toDataURL();
-
+        console.log("Shield object: ", shield);
         //console.log("Ended removal spaces phase");
     }
 
